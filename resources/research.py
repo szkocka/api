@@ -5,7 +5,7 @@ from common.util import handle_object_id
 class Research(Resource):
     def __init__(self, **kwargs):
         self.db = kwargs['db']
-        self.self.researches = self.db['researches']
+        self.researches = self.db['researches']
 
     def get(self, research_id):
         def get_research():

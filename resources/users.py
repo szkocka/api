@@ -6,7 +6,8 @@ from security.authenticate import Token
 
 class Users(Resource):
     def __init__(self, **kwargs):
-        self.users = kwargs['db']['users']
+        self.db = kwargs['db']
+        self.users = self.db['users']
         self.logger = kwargs['logger']
 
     def post(self):
