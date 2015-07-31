@@ -1,6 +1,8 @@
-import datetime
+from datetime import datetime
+from bson import ObjectId
 from flask import request
 from flask.ext.restful import Resource
+from common.util import handle_object_id
 from security import authenticate
 
 
@@ -9,10 +11,24 @@ class Forum(Resource):
 
     def __init__(self, **kwargs):
         self.db = kwargs['db']
-        self.messages = self.db.messages
+        self.forums = self.db['forums']
+        self.messages = self.db['messages']
 
     def get(self, forum_id):
-        pass
+        def get_forum():
+            forum = self.forums.find_one({'_id': ObjectId(forum_id)})
+
+            if forum is None:
+                return {'message': 'Forum with ID: {0} not found.'.format(forum_id)}, 404
+
+            messages = self.messages.find({'forum': forum_id})
+
+            return {
+                'forum': handle_object_id(forum),
+                'messages': map(handle_object_id, messages)
+            }, 200
+
+        return get_forum()
 
     def post(self, forum_id, current_user):
         def add_message():
@@ -20,7 +36,7 @@ class Forum(Resource):
 
             message_id = self.messages.insert_one({
                 "createBy": current_user.id(),
-                "created": datetime.datetime.now(),
+                "created": datetime.now(),
                 "body": json["body"],
                 "forum": forum_id
             }).inserted_id

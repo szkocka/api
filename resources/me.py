@@ -9,4 +9,4 @@ class Me(Resource):
         self.db = kwargs['db']
 
     def get(self, current_user):
-        return current_user.to_json(), 200
+        return current_user, 200

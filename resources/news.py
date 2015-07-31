@@ -1,6 +1,7 @@
-import datetime
+from datetime import datetime
 from flask import request
 from flask.ext.restful import Resource
+from common.util import handle_object_id
 from security import authenticate
 
 
@@ -18,7 +19,7 @@ class News(Resource):
 
             news_id = self.news.insert_one({
                 "createBy": current_user.id(),
-                "created": datetime.datetime.now(),
+                "created": datetime.now(),
                 "title": json["title"],
                 "body": json["body"]
             }).inserted_id
@@ -29,6 +30,6 @@ class News(Resource):
 
     def get(self):
         def list_news():
-            return self.news.find()
+            return map(handle_object_id, self.news.find())
 
         return list_news()

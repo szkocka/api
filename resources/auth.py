@@ -1,11 +1,13 @@
 from flask import request
 from flask.ext.restful import Resource
-from common.util import hash_password, new_token
+from common.util import hash_password, generate_token
+from security.authenticate import Token
 
 
 class AuthLocal(Resource):
     def __init__(self, **kwargs):
-        self.users = kwargs['db']['users']
+        self.db = kwargs['db']
+        self.users = self.db['users']
         self.logger = kwargs['logger']
 
     def post(self):
@@ -19,10 +21,12 @@ class AuthLocal(Resource):
                     'email': email,
                     'hashed_pass': hashed_pass
                 },
-                {
-                    '_id': True
-                }
+                {'_id': True}
             )
-            return {'token': new_token(user_id)}, 200
+
+            if user_id is None:
+                return {'message': 'User not found.'}, 401
+
+            return Token(generate_token(user_id)), 200
 
         return login()

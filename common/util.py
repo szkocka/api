@@ -5,7 +5,7 @@ SECRET_KEY = "qwertyuiopasdfghjklzxcvbnm"
 TOKEN_SERIALIZER = TimedJSONWebSignatureSerializer(SECRET_KEY)
 
 
-def new_token(user_id):
+def generate_token(user_id):
     return TOKEN_SERIALIZER.dumps(str(user_id))
 
 def verify_token(token):
@@ -13,3 +13,7 @@ def verify_token(token):
 
 def hash_password(password):
     return hashlib.sha256(password).hexdigest()
+
+def handle_object_id(doc):
+    if '_id' in doc:
+        doc['_id'] = str(doc['_id'])

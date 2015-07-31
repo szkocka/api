@@ -1,6 +1,8 @@
 from flask import request
 from flask.ext.restful import Resource
-from common.util import hash_password, new_token
+from common.util import hash_password, generate_token
+from security.authenticate import Token
+
 
 class Users(Resource):
     def __init__(self, **kwargs):
@@ -11,16 +13,14 @@ class Users(Resource):
         def create_user():
             json = request.json
 
-            name = json['name']
-            email = json['email']
-            hashed_pass = hash_password(json['password'])
-
             user_id = self.users.insert_one({
-                'name': name,
-                'email': email,
-                'hashed_pass': hashed_pass
+                'name': json['name'],
+                'email': json['email'],
+                'hashed_pass':  hash_password(json['password']),
+                'provider': 'local',
+                'role': 'user'
             }).inserted_id
 
-            return {'token': new_token(user_id)}, 201
+            return Token(generate_token(user_id)), 201
 
         return create_user()
