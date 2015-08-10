@@ -2,7 +2,7 @@ import hashlib
 from itsdangerous import TimedJSONWebSignatureSerializer
 
 SECRET_KEY = "qwertyuiopasdfghjklzxcvbnm"
-TOKEN_SERIALIZER = TimedJSONWebSignatureSerializer(SECRET_KEY)
+TOKEN_SERIALIZER = TimedJSONWebSignatureSerializer(SECRET_KEY, expires_in=36000)
 
 
 def generate_token(user_id):
@@ -17,3 +17,8 @@ def hash_password(password):
 def handle_object_id(doc):
     if '_id' in doc:
         doc['_id'] = str(doc['_id'])
+
+    if 'created' in doc:
+        doc['created'] = str(doc['created'])
+
+    return doc

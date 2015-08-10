@@ -1,11 +1,26 @@
 from datetime import datetime
+
 from flask import request
 from flask.ext.restful import Resource
+
 from common.util import handle_object_id
-from security import authenticate
+from security.authenticate import authenticate
+
+class ListNews(Resource):
+    method_decorators = [authenticate]
+
+    def __init__(self, **kwargs):
+        self.db = kwargs['db']
+        self.news = self.db["news"]
+        self.logger = kwargs['logger']
+
+    def get(self, current_user):
+        news = self.news.find().sort('created')
+
+        return {'news': map(handle_object_id, news)}, 200
 
 
-class News(Resource):
+class AddNews(Resource):
     method_decorators = [authenticate]
 
     def __init__(self, **kwargs):
@@ -14,22 +29,13 @@ class News(Resource):
         self.logger = kwargs['logger']
 
     def post(self, current_user):
-        def add_news():
-            json = request.json
+        json = request.json
 
-            news_id = self.news.insert_one({
-                "createBy": current_user.id(),
-                "created": datetime.now(),
-                "title": json["title"],
-                "body": json["body"]
-            }).inserted_id
+        news_id = self.news.insert_one({
+            "createBy": current_user.id(),
+            "created": datetime.now(),
+            "title": json["title"],
+            "body": json["body"]
+        }).inserted_id
 
-            return {news_id: str(news_id)}, 201
-
-        return add_news()
-
-    def get(self):
-        def list_news():
-            return map(handle_object_id, self.news.find())
-
-        return list_news()
+        return {'news_id': str(news_id)}, 201

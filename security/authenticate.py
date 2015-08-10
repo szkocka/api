@@ -1,25 +1,24 @@
 from functools import wraps
 from bson import ObjectId
 from flask import request
-from flask.json import JSONEncoder
 from itsdangerous import SignatureExpired, BadSignature
 from common.util import verify_token, handle_object_id
 
-class Token(JSONEncoder):
+class Token:
     def __init__(self, token):
         self.token = token
 
-    def default(self, o):
-        return o.__dict__
+    def to_json(self):
+        return self.__dict__
 
-class CurrentUser(JSONEncoder):
+class CurrentUser:
     def __init__(self, user):
         self.user = user
         handle_object_id(self.user)
         del self.user['hashed_pass']
 
-    def default(self, o):
-        return o.__dict__
+    def to_json(self):
+        return self.__dict__
 
     def id(self):
         return self.user["_id"]
