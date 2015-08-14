@@ -12,7 +12,7 @@ from resources.users import CreateUser
 
 app = Flask(__name__)
 api = Api(app)
-cors = CORS(app)
+CORS(app)
 
 mongo_client = MongoClient('mongodb://localhost:27017/')
 

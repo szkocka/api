@@ -30,10 +30,12 @@ def authenticate(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        if 'token' not in request.cookies:
+
+        if 'Authorization' not in request.headers:
             return {'message': "Token not present."}, 401
 
-        token = request.cookies['token']
+        authorization = request.headers['Authorization']
+        token = authorization.replace('Bearer ', '')
         try:
             user_id = verify_token(token)
         except SignatureExpired:
