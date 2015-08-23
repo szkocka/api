@@ -2,12 +2,14 @@ from flask import Flask
 from flask.ext.cors import CORS
 from pymongo import MongoClient
 from flask.ext.restful import Api
+from mailer.mailer import Mailer
 
 from resources.auth import AuthLocalLogin
 from resources.forums import ListForums, AddForum, GetForum, AddMessage
 from resources.me import Me
 from resources.news import AddNews, ListNews
-from resources.researches import AddResearch, ListResearches, GetResearch, UpdateResearch
+from resources.researches import AddResearch, ListResearches, GetResearch, UpdateResearch, InviteToJoinResearch, \
+    ReqToJoinResearch
 from resources.users import CreateUser
 
 app = Flask(__name__)
@@ -15,8 +17,13 @@ api = Api(app)
 CORS(app)
 
 mongo_client = MongoClient('mongodb://localhost:27017/')
+mailer = Mailer()
 
-resource_args = {'db': mongo_client.lsm, 'logger': app.logger}
+resource_args = {
+    'db': mongo_client.lsm,
+    'logger': app.logger,
+    'mailer': mailer
+}
 
 api.add_resource(AddNews, '/news', resource_class_kwargs=resource_args)
 api.add_resource(ListNews, '/news', resource_class_kwargs=resource_args)
@@ -28,6 +35,8 @@ api.add_resource(GetForum, '/researches/forums/<forum_id>', resource_class_kwarg
 api.add_resource(AddMessage, '/researches/forums/<forum_id>', resource_class_kwargs=resource_args)
 api.add_resource(ListForums, '/researches/<research_id>/forums', resource_class_kwargs=resource_args)
 api.add_resource(AddForum, '/researches/<research_id>/forums', resource_class_kwargs=resource_args)
+api.add_resource(InviteToJoinResearch, '/researches/<research_id>/invite', resource_class_kwargs=resource_args)
+api.add_resource(ReqToJoinResearch, '/researches/<research_id>/join', resource_class_kwargs=resource_args)
 api.add_resource(CreateUser, '/users', resource_class_kwargs=resource_args)
 api.add_resource(AuthLocalLogin, '/auth/local', resource_class_kwargs=resource_args)
 api.add_resource(Me, '/users/me', resource_class_kwargs=resource_args)
