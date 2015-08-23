@@ -1,6 +1,7 @@
 from flask import request
 from flask.ext.restful import Resource
 from common.util import hash_password, generate_token
+from security.authenticate import Token
 
 
 class AuthLocalLogin(Resource):
@@ -25,4 +26,4 @@ class AuthLocalLogin(Resource):
         if user is None:
             return {'message': 'User not found.'}, 401
 
-        return {'token': generate_token(user['_id'])}, 200
+        return Token(user['_id']).json(), 200

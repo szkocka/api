@@ -2,14 +2,15 @@ from functools import wraps
 from bson import ObjectId
 from flask import request
 from itsdangerous import SignatureExpired, BadSignature
-from common.util import verify_token, handle_object_id
+from common.util import verify_token, handle_object_id, generate_token
+
 
 class Token:
-    def __init__(self, token):
-        self.token = token
+    def __init__(self, user_id):
+        self.token = generate_token(user_id)
 
-    def to_json(self):
-        return self.__dict__
+    def json(self):
+        return {'token': self.token}
 
 class CurrentUser:
     def __init__(self, user):
@@ -17,7 +18,7 @@ class CurrentUser:
         handle_object_id(self.user)
         del self.user['hashed_pass']
 
-    def to_json(self):
+    def json(self):
         return self.__dict__
 
     def id(self):

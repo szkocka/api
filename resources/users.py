@@ -1,6 +1,7 @@
 from flask import request
 from flask.ext.restful import Resource
 from common.util import hash_password, generate_token
+from security.authenticate import Token
 
 
 class CreateUser(Resource):
@@ -20,4 +21,4 @@ class CreateUser(Resource):
             'role': 'user'
         }).inserted_id
 
-        return {'token': generate_token(user_id)}, 201
+        return Token(user_id).json(), 201
