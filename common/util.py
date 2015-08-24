@@ -13,12 +13,3 @@ def verify_token(token):
 
 def hash_password(password):
     return hashlib.sha256(password).hexdigest()
-
-def handle_object_id(doc):
-    if '_id' in doc:
-        doc['_id'] = str(doc['_id'])
-
-    if 'created' in doc:
-        doc['created'] = str(doc['created'])
-
-    return doc

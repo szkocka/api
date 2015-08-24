@@ -2,8 +2,8 @@ from bson import ObjectId
 from datetime import datetime
 from flask import request
 from flask.ext.restful import Resource
-from common.util import handle_object_id
 from mailer.views import ReqToJoinSubj, ReqToJoin, InviteToJoinSubj, InviteToJoin
+from resources.prettify_responses import prettify_researches, prettify_research
 from security.authenticate import authenticate
 
 
@@ -13,6 +13,7 @@ class GetResearch(Resource):
     def __init__(self, **kwargs):
         self.db = kwargs['db']
         self.researches = self.db['researches']
+        self.users = self.db['users']
 
     def get(self, research_id, current_user):
         research = self.researches.find_one({'_id': ObjectId(research_id)})
@@ -20,7 +21,7 @@ class GetResearch(Resource):
         if research is None:
             return {'message': 'Research with ID: {0} not found.'.format(research_id)}, 404
 
-        return handle_object_id(research), 200
+        return prettify_research(self.users, research), 200
 
 
 class UpdateResearch(Resource):
@@ -87,10 +88,11 @@ class ListResearches(Resource):
     def __init__(self, **kwargs):
         self.db = kwargs['db']
         self.researches = self.db['researches']
+        self.users = self.db['users']
 
     def get(self):
         researches = self.researches.find()
-        return {'researches': map(handle_object_id, researches)}, 200
+        return {'researches': prettify_researches(self.users, researches)}, 200
 
 
 class InviteToJoinResearch(Resource):

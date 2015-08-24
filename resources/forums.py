@@ -2,8 +2,9 @@ from datetime import datetime
 from bson import ObjectId
 from flask import request
 from flask.ext.restful import Resource
-from common.util import handle_object_id
+from resources.prettify_responses import prettify_forums, prettify_forum, prettify_messages
 from security.authenticate import authenticate
+
 
 class ListForums(Resource):
     method_decorators = [authenticate]
@@ -11,10 +12,11 @@ class ListForums(Resource):
     def __init__(self, **kwargs):
         self.db = kwargs['db']
         self.forums = self.db['forums']
+        self.users = self.db['users']
 
     def get(self, research_id, current_user):
-        forums = self.forums.find({"research": research_id})
-        return {'forums': map(handle_object_id, forums)}, 200
+        forums = self.forums.find({'research': research_id})
+        return {'forums': prettify_forums(self.users, forums)}, 200
 
 
 class AddForum(Resource):
@@ -28,14 +30,13 @@ class AddForum(Resource):
         json = request.json
 
         forum_id = self.forums.insert_one({
-            "createBy": current_user.id(),
-            "created": datetime.now(),
-            "subject": json["subject"],
-            "research": research_id
+            'createdBy': current_user.id(),
+            'created': datetime.now(),
+            'subject': json['subject'],
+            'research': research_id
         }).inserted_id
 
-        return {"forum_id": str(forum_id)}, 201
-
+        return {'forum_id': str(forum_id)}, 201
 
 class GetForum(Resource):
     method_decorators = [authenticate]
@@ -44,6 +45,7 @@ class GetForum(Resource):
         self.db = kwargs['db']
         self.forums = self.db['forums']
         self.messages = self.db['messages']
+        self.users = self.db['users']
 
     def get(self, forum_id, current_user):
         forum = self.forums.find_one({'_id': ObjectId(forum_id)})
@@ -53,7 +55,10 @@ class GetForum(Resource):
 
         messages = self.messages.find({'forum': forum_id})
 
-        return {'forum': handle_object_id(forum), 'messages': map(handle_object_id, messages)}, 200
+        return {
+            'forum': prettify_forum(self.users, forum),
+            'messages': prettify_messages(self.users, messages)
+        }, 200
 
 
 class AddMessage(Resource):
@@ -68,10 +73,10 @@ class AddMessage(Resource):
         json = request.json
 
         message_id = self.messages.insert_one({
-            "createBy": current_user.id(),
-            "created": datetime.now(),
-            "message": json["message"],
-            "forum": forum_id
+            'createdBy': current_user.id(),
+            'created': datetime.now(),
+            'message': json['message'],
+            'forum': forum_id
         }).inserted_id
 
-        return {"message_id": str(message_id)}, 201
+        return {'message_id': str(message_id)}, 201
