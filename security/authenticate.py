@@ -28,6 +28,9 @@ class CurrentUser:
     def id(self):
         return self.user['_id']
 
+    def email(self):
+        return self.user['email']
+
 def authenticate(func):
     def find_user(user_id):
         users = func.im_self.db.users

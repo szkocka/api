@@ -2,20 +2,19 @@ from bson import ObjectId
 from datetime import datetime
 from flask import request
 from flask.ext.restful import Resource
+from common.util import is_supervisor
 from mailer.views import ReqToJoinSubj, ReqToJoin, InviteToJoinSubj, InviteToJoin
 from resources.prettify_responses import prettify_researches, prettify_research
 from security.authenticate import authenticate
 
 
 class GetResearch(Resource):
-    method_decorators = [authenticate]
-
     def __init__(self, **kwargs):
         self.db = kwargs['db']
         self.researches = self.db['researches']
         self.users = self.db['users']
 
-    def get(self, research_id, current_user):
+    def get(self, research_id):
         research = self.researches.find_one({'_id': ObjectId(research_id)})
 
         if research is None:
@@ -38,6 +37,9 @@ class UpdateResearch(Resource):
 
         if research is None:
             return {'message': 'Research with ID: {0} not found.'.format(research_id)}, 404
+
+        if not is_supervisor(current_user, research):
+            return {'message': 'You must be supervisor to update research.'}, 403
 
         research['title'] = json['title']
         research['tags'] = json['tags']
@@ -109,6 +111,9 @@ class InviteToJoinResearch(Resource):
 
         if research is None:
             return {'message': 'Research with ID: {0} not found.'.format(research_id)}, 404
+
+        if not is_supervisor(current_user, research):
+            return {'message': 'You must be supervisor for inviting to join research.'}, 403
 
         json = request.json
         email = json['email']
