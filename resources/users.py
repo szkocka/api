@@ -13,12 +13,18 @@ class CreateUser(Resource):
     def post(self):
         json = request.json
 
-        user_id = self.users.insert_one({
+        email = json['email']
+
+        if self.users.find_one({'email': email}) is not None:
+            return {'message': 'User with email {0} already exists'.format(email)}, 400
+
+        new_user = {
             'name': json['name'],
-            'email': json['email'],
+            'email': email,
             'hashed_pass':  hash_password(json['password']),
             'provider': 'local',
             'role': 'user'
-        }).inserted_id
+        }
+        user_id = self.users.insert_one(new_user).inserted_id
 
         return Token(user_id).json(), 201
