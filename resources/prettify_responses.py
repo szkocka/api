@@ -38,7 +38,8 @@ def prettify_research(users, research):
             'brief': research['description']['brief'],
             'detailed': research['description']['detailed']
         },
-        'researchers': research['researchers']
+        'researchers': research['researchers'],
+        '_id': str(research['_id'])
     }
 
 def prettify_news(users, news):

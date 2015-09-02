@@ -118,7 +118,7 @@ class InviteToJoinResearch(Resource):
         json = request.json
         email = json['email']
 
-        self.send_invite(current_user, email, research, json['text'])
+        #self.send_invite(current_user, email, research, json['text'])
         self.update_research(email, research)
 
         return {'message': "Invitation send to {0}".format(email)}, 200
@@ -172,9 +172,9 @@ class ReqToJoinResearch(Resource):
         title = research['title']
         user = current_user.user['name']
 
-        self.mailer.send(
-            ReqToJoinSubj(user, title),
-            ReqToJoin(supervisor_name, user, title, text), [supervisor_email])
+        #self.mailer.send(
+            #ReqToJoinSubj(user, title),
+            #ReqToJoin(supervisor_name, user, title, text), [supervisor_email])
 
         return {'message': "Request to join was send to {0}".format(supervisor_email)}, 200
 
