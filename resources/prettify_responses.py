@@ -39,6 +39,7 @@ def prettify_research(users, research):
             'detailed': research['description']['detailed']
         },
         'researchers': research['researchers'],
+        'image_url': research['image_url'],
         '_id': str(research['_id'])
     }
 

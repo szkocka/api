@@ -45,6 +45,7 @@ class UpdateResearch(Resource):
         research['tags'] = json['tags']
         research['area'] = json['area']
         research['status'] = json['status']
+        research['image_url'] = json['image_url']
         research['description'] = {
             'brief': json['description']['brief'],
             'detailed': json['description']['detailed']
@@ -82,7 +83,8 @@ class AddResearch(Resource):
                 'brief': json['description']['brief'],
                 'detailed': json['description']['detailed']
             },
-            'researchers': []
+            'researchers': [],
+            'image_url': json['image_url']
         }
 
 
