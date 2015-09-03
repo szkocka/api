@@ -1,9 +1,11 @@
 from datetime import datetime
+
 from bson import ObjectId
 from flask import request
 from flask.ext.restful import Resource
+
 from common.util import is_supervisor
-from resources.prettify_responses import prettify_forums, prettify_forum, prettify_messages
+from common.prettify_responses import prettify_forums, prettify_forum, prettify_messages
 from security.authenticate import authenticate
 
 

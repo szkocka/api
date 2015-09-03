@@ -1,10 +1,12 @@
-from bson import ObjectId
 from datetime import datetime
+
+from bson import ObjectId
 from flask import request
 from flask.ext.restful import Resource
+
 from common.util import is_supervisor
-from mailer.views import ReqToJoinSubj, ReqToJoin, InviteToJoinSubj, InviteToJoin
-from resources.prettify_responses import prettify_researches, prettify_research
+from mailer.views import InviteToJoinSubj, InviteToJoin
+from common.prettify_responses import prettify_researches, prettify_research
 from security.authenticate import authenticate
 
 

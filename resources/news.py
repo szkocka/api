@@ -2,9 +2,9 @@ from datetime import datetime
 
 from flask import request
 from flask.ext.restful import Resource
-from common.validation import validate_request
-from resources.prettify_responses import prettify_news
 
+from common.validation import validate_request
+from common.prettify_responses import prettify_news
 from security.authenticate import authenticate
 
 
