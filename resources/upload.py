@@ -1,8 +1,10 @@
-from boto.s3.key import Key, boto
+from boto.s3.key import boto
 from bson import ObjectId
 from flask import request
 from flask.ext.restful import Resource
-from security.authenticate import authenticate
+from common.http_responses import created
+
+from common.security import authenticate
 
 BUCKET_NAME = 'srg-images'
 IMAGE_TYPE = 'image/jpeg'
@@ -23,4 +25,8 @@ class Upload(Resource):
         key.set_contents_from_file(uploaded_file)
         key.make_public()
 
-        return {"url": key.generate_url(expires_in=0, query_auth=False, force_http=True)}, 201
+        return created(
+            {
+                "url": key.generate_url(expires_in=0, query_auth=False, force_http=True)
+            }
+        )

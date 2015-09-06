@@ -1,6 +1,3 @@
-__author__ = 'mykola.kavf'
-
-
 class InviteToJoin(object):
     def __init__(self, supervisor, title, description, researcher, text):
         self.supervisor = supervisor

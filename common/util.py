@@ -13,6 +13,3 @@ def verify_token(token):
 
 def hash_password(password):
     return hashlib.sha256(password).hexdigest()
-
-def is_supervisor(current_user, research):
-    return current_user.id() == research['supervisor']

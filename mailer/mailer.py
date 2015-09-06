@@ -9,7 +9,8 @@ class Mailer:
         self.connection = boto.ses.connect_to_region('eu-west-1')
 
     def send(self, subj_view, body_view, recipients):
-        subj = self.renderer.render(subj_view)
-        body = self.renderer.render(body_view)
+        pass
+        #subj = self.renderer.render(subj_view)
+        #body = self.renderer.render(body_view)
 
-        self.connection.send_email(self.from_email, subj, body, recipients)
+        #self.connection.send_email(self.from_email, subj, body, recipients)

@@ -8,8 +8,8 @@ from resources.auth import AuthLocalLogin
 from resources.forums import ListForums, AddForum, GetForum, AddMessage
 from resources.me import Me
 from resources.news import AddNews, ListNews
-from resources.researches import AddResearch, ListResearches, GetResearch, UpdateResearch, InviteToJoinResearch, \
-    ReqToJoinResearch
+from resources.research_emails import InviteToJoinResearch, ReqToJoinResearch
+from resources.researches import AddResearch, ListResearches, GetResearch, UpdateResearch
 from resources.upload import Upload
 from resources.users import CreateUser
 

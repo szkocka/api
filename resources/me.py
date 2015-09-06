@@ -1,6 +1,7 @@
 from flask.ext.restful import Resource
+from common.http_responses import ok
 
-from security.authenticate import authenticate
+from common.security import authenticate
 
 class Me(Resource):
     method_decorators = [authenticate]
@@ -9,4 +10,4 @@ class Me(Resource):
         self.db = kwargs['db']
 
     def get(self, current_user):
-        return current_user.json(), 200
+        return ok(current_user.json())
