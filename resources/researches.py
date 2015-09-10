@@ -38,7 +38,7 @@ class GetResearch(Resource):
 
 
 class AddResearch(Resource):
-    method_decorators = [authenticate, validate_request]
+    method_decorators = [validate_request, authenticate]
     required_fields = ['title', 'area', 'description']  # used by validate_request
 
     def __init__(self, **kwargs):
@@ -77,7 +77,7 @@ class AddResearch(Resource):
         }
 
 class UpdateResearch(Resource):
-    method_decorators = [authenticate, is_supervisor]
+    method_decorators = [is_supervisor, insert_research, authenticate]
 
     def __init__(self, **kwargs):
         self.db = kwargs['db']

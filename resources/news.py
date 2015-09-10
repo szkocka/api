@@ -30,7 +30,7 @@ class ListNews(Resource):
 
 
 class AddNews(Resource):
-    method_decorators = [authenticate, validate_request]
+    method_decorators = [validate_request, authenticate]
     required_fields = ['title', 'body']  # used by validate_request
 
     def __init__(self, **kwargs):

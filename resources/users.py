@@ -9,7 +9,7 @@ from common.security import Token
 
 class CreateUser(Resource):
     method_decorators = [validate_request]
-    required_fields = ['email', 'name', 'password'] # used by validate_request
+    required_fields = ['email', 'name', 'password']  # used by validate_request
 
     def __init__(self, **kwargs):
         self.db = kwargs['db']

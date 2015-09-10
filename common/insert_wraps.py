@@ -1,11 +1,12 @@
 from functools import wraps
 from bson import ObjectId
 from common.http_responses import bad_request, forum_not_found, research_not_found
+from common.util import im_self
 
 
 def insert_research(func):
     def __find_research(_id):
-        researches = func.im_self.db.researches
+        researches = im_self(func).db.researches
         return researches.find_one(
             {
                 '_id': ObjectId(_id)
@@ -14,7 +15,7 @@ def insert_research(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        if 'forum_id' not in kwargs:
+        if 'research_id' not in kwargs:
             return bad_request('To use insert_research wrapper research_id must be in url.')
 
         _id = kwargs['research_id']
@@ -32,7 +33,7 @@ def insert_research(func):
 
 def insert_forum(func):
     def __find_forum(_id):
-        forums = func.im_self.forums
+        forums = im_self(func).forums
         return forums.find_one(
             {
                 '_id': ObjectId(_id)

@@ -11,7 +11,7 @@ from common.security import authenticate, is_researcher
 
 
 class ListForums(Resource):
-    method_decorators = [authenticate, insert_research, is_researcher]
+    method_decorators = [is_researcher, insert_research, authenticate]
 
     def __init__(self, **kwargs):
         self.db = kwargs['db']
@@ -38,7 +38,7 @@ class ListForums(Resource):
 
 
 class AddForum(Resource):
-    method_decorators = [authenticate, validate_request, insert_research, is_researcher]
+    method_decorators = [is_researcher, insert_research, validate_request, authenticate]
     required_fields = ['subject']  # used by validate_request
 
     def __init__(self, **kwargs):
@@ -47,7 +47,7 @@ class AddForum(Resource):
         self.researches = self.db['researches']
 
     def post(self, research, current_user):
-        forum = self.__create_forum(current_user, research)
+        forum = self.__create(current_user, research)
         forum_id = self.__save(forum)
 
         return created(
@@ -65,12 +65,12 @@ class AddForum(Resource):
             'createdBy': current_user.id(),
             'created': datetime.now(),
             'subject': json['subject'],
-            'research': research['_id']
+            'research': str(research['_id'])
         }
 
 
 class GetForum(Resource):
-    method_decorators = [authenticate, insert_forum, is_researcher]
+    method_decorators = [is_researcher, insert_forum, authenticate]
 
     def __init__(self, **kwargs):
         self.db = kwargs['db']
@@ -99,7 +99,7 @@ class GetForum(Resource):
 
 
 class AddMessage(Resource):
-    method_decorators = [authenticate, validate_request, insert_forum, is_researcher]
+    method_decorators = [is_researcher, insert_forum, validate_request, authenticate]
     required_fields = ['message']  # used by validate_request
 
     def __init__(self, **kwargs):

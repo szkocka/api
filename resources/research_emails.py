@@ -9,8 +9,8 @@ from common.security import authenticate, is_supervisor
 
 
 class InviteToJoinResearch(Resource):
-    method_decorators = [authenticate, validate_request, insert_research, is_supervisor]
-    required_fields = ['email', 'text']  # used by validate_request
+    method_decorators = [is_supervisor, insert_research, validate_request, authenticate]
+    required_fields = ['email']  # used by validate_request
 
     def __init__(self, **kwargs):
         self.db = kwargs['db']
@@ -28,7 +28,7 @@ class InviteToJoinResearch(Resource):
 
     def __request_fields(self):
         json = request.json
-        return json['email'], json['text']
+        return json['email'], json.get('text', '')
 
     def __send_invite(self, current_user, email, research, text):
         supervisor = current_user.name()
@@ -55,8 +55,7 @@ class InviteToJoinResearch(Resource):
 
 
 class ReqToJoinResearch(Resource):
-    method_decorators = [authenticate, validate_request, insert_research]
-    required_fields = ['text']  # used by validate_request
+    method_decorators = [insert_research, authenticate]
 
     def __init__(self, **kwargs):
         self.db = kwargs['db']
@@ -65,7 +64,7 @@ class ReqToJoinResearch(Resource):
         self.mailer = kwargs['mailer']
 
     def post(self, research, current_user):
-        text = request.json['text']
+        text = request.json.get('text', '')
         sup_name, sup_email = self.__supervisor_fields(research)
         title = research['title']
         user_name = current_user.name()

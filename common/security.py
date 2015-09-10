@@ -3,7 +3,7 @@ from bson import ObjectId
 from flask import request
 from itsdangerous import SignatureExpired, BadSignature
 from common.http_responses import forbidden, unauthorized, bad_request
-from common.util import verify_token, generate_token
+from common.util import verify_token, generate_token, im_self
 
 
 class Token:
@@ -37,7 +37,7 @@ class CurrentUser:
 
 def authenticate(func):
     def __find_user(user_id):
-        users = func.im_self.db.users
+        users = im_self(func).db.users
         return users.find_one(
             {
                 '_id': ObjectId(user_id)
@@ -71,7 +71,7 @@ def authenticate(func):
 
 def is_researcher(func):
     def __find_research(_id):
-        researches = func.im_self.db.researches
+        researches = im_self(func).db.researches
         return researches.find_one(
             {
                 '_id': ObjectId(_id)
@@ -91,7 +91,7 @@ def is_researcher(func):
             research = kwargs['research']
         elif 'forum':
             forum = kwargs['forum']
-            research = __find_research(forum['_id'])
+            research = __find_research(forum['research'])
         else:
             return bad_request("Can't get info about research.")
 
