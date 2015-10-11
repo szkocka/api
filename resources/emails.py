@@ -1,11 +1,11 @@
 from flask import request
 from flask.ext.restful import Resource
 
-from app import db
 from common.http_responses import ok_msg
 from common.insert_wraps import insert_research
 from common.validation import validate_request
 from common.security import authenticate, is_supervisor
+from db.repository import find_user_by_email, update
 from mailer.mailer import Mailer
 from mailer.views import InviteToJoinSubj, InviteToJoin, ReqToJoinSubj, ReqToJoin
 
@@ -24,7 +24,7 @@ class InviteToJoinResearch(Resource):
         research.researchers.append(email)
         research.researchers = list(set(research['researchers']))
 
-        db.update()
+        update()
         return ok_msg("Invitation send to {0}".format(email))
 
     def __request_fields(self):
@@ -35,7 +35,7 @@ class InviteToJoinResearch(Resource):
         supervisor = current_user.name
         title = research['title']
         description = research.brief_desc
-        user = db.find_user_by_email(email)
+        user = find_user_by_email(email)
         researcher = user.name if user else email
 
         mailer.send(

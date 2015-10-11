@@ -1,12 +1,12 @@
 from flask import request
 from flask.ext.restful import Resource
 
-from app import db
 from common.http_responses import ok, created
 from common.validation import validate_request
 from common.prettify_responses import prettify_news
 from common.security import authenticate
 from db.model import News
+from db.repository import save
 
 
 class ListNews(Resource):
@@ -28,7 +28,7 @@ class AddNews(Resource):
 
         news = News(current_user, title, body)
 
-        db.save(news)
+        save(news)
         return created(
             {
                 'news_id': news.id

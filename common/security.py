@@ -3,9 +3,9 @@ from functools import wraps
 from flask import request
 from itsdangerous import SignatureExpired, BadSignature
 
-from app import db
 from common.http_responses import forbidden, unauthorized, bad_request
 from common.util import verify_token, generate_token
+from db.repository import get_user
 
 
 class Token:
@@ -33,7 +33,7 @@ def authenticate(func):
         except BadSignature:
             return unauthorized('Invalid token.')
 
-        user = db.get_user(user_id)
+        user = get_user(user_id)
 
         if not user:
             return unauthorized('User not found.')

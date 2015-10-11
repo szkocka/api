@@ -1,13 +1,13 @@
 from flask import request
 from flask.ext.restful import Resource
 
-from app import db
 from common.http_responses import ok, created
 from common.insert_wraps import insert_research
 from common.validation import validate_request
 from common.prettify_responses import prettify_researches, prettify_research
 from common.security import authenticate, is_supervisor
 from db.model import Research
+from db.repository import update, save
 
 
 class ListResearches(Resource):
@@ -33,7 +33,7 @@ class AddResearch(Resource):
     def post(self, current_user):
         research = self.__create(current_user, request.json)
 
-        db.save(research)
+        save(research)
         return created(
             {
                 'research_id': research.id
@@ -68,7 +68,7 @@ class UpdateResearch(Resource):
         research.brief_desc = description.get('brief', research.brief_desc)
         research.detailed_desc = description.get('detailed', research.detailed_desc)
 
-        db.update()
+        update()
         return ok(
             {
                 'research_id': research.id

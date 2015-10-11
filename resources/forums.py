@@ -1,13 +1,13 @@
 from flask import request
 from flask.ext.restful import Resource
 
-from app import db
 from common.http_responses import created, ok
 from common.insert_wraps import insert_forum, insert_research
 from common.prettify_responses import prettify_forums, prettify_forum, prettify_messages
 from common.validation import validate_request
 from common.security import authenticate, is_researcher
 from db.model import Forum, Message
+from db.repository import save
 
 
 class ListForums(Resource):
@@ -28,7 +28,7 @@ class AddForum(Resource):
     def post(self, current_user, research):
         forum = Forum(current_user, research, request.json['subject'])
 
-        db.save(forum)
+        save(forum)
         return created(
             {
                 'forum_id': forum.id
@@ -55,7 +55,7 @@ class AddMessage(Resource):
     def post(self, current_user, forum):
         message = Message(current_user, forum, request.json['message'])
 
-        db.save(message)
+        save(message)
         return created(
             {
                 'message_id': message.id
