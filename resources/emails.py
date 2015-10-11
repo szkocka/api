@@ -9,7 +9,7 @@ from db.repository import find_user_by_email, update
 from mailer.mailer import Mailer
 from mailer.views import InviteToJoinSubj, InviteToJoin, ReqToJoinSubj, ReqToJoin
 
-mailer = Mailer()
+#mailer = Mailer()
 
 
 class InviteToJoinResearch(Resource):
@@ -37,9 +37,9 @@ class InviteToJoinResearch(Resource):
         title = research.title
         description = research.brief_desc
 
-        mailer.send(
-            InviteToJoinSubj(supervisor, title),
-            InviteToJoin(supervisor, title, description, researcher, text), [email])
+        #mailer.send(
+            #InviteToJoinSubj(supervisor, title),
+            #InviteToJoin(supervisor, title, description, researcher, text), [email])
 
 
 class ReqToJoinResearch(Resource):
@@ -51,8 +51,8 @@ class ReqToJoinResearch(Resource):
         supervisor = research.supervisor
         user_name = current_user.name
 
-        mailer.send(
-            ReqToJoinSubj(user_name, title),
-            ReqToJoin(supervisor.name, user_name, title, text), [supervisor.email])
+        #mailer.send(
+            #ReqToJoinSubj(user_name, title),
+            #ReqToJoin(supervisor.name, user_name, title, text), [supervisor.email])
 
         return ok_msg('Request to join was send to {0}'.format(supervisor.email))
