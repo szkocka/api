@@ -17,26 +17,25 @@ class InviteToJoinResearch(Resource):
     required_fields = ['email']  # used by validate_request
 
     def post(self, research, current_user):
-        email, text = self.__request_fields()
+        email = request.json['email']
+        text = request.json.get('text', '')
+        supervisor = current_user.name
 
-        self.__send_invite(current_user, email, research, text)
-
-        research.researchers.append(email)
-        research.researchers = list(set(research['researchers']))
+        user = find_user_by_email(email)
+        if user:
+            research.researchers.append(user)
+            researcher = user.name
+        else:
+            researcher = email
 
         update()
+        self.__send_invite(supervisor, researcher, email, research, text)
+
         return ok_msg("Invitation send to {0}".format(email))
 
-    def __request_fields(self):
-        json = request.json
-        return json['email'], json.get('text', '')
-
-    def __send_invite(self, current_user, email, research, text):
-        supervisor = current_user.name
-        title = research['title']
+    def __send_invite(self, supervisor, researcher, email, research, text):
+        title = research.title
         description = research.brief_desc
-        user = find_user_by_email(email)
-        researcher = user.name if user else email
 
         mailer.send(
             InviteToJoinSubj(supervisor, title),
