@@ -2,6 +2,7 @@ import boto.ses
 import pystache
 import boto.pyami.config
 
+
 class Mailer:
     def __init__(self):
         self.renderer = pystache.Renderer()

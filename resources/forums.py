@@ -1,131 +1,63 @@
-from datetime import datetime
-
 from flask import request
 from flask.ext.restful import Resource
+
+from app import db
 from common.http_responses import created, ok
 from common.insert_wraps import insert_forum, insert_research
-
 from common.prettify_responses import prettify_forums, prettify_forum, prettify_messages
 from common.validation import validate_request
 from common.security import authenticate, is_researcher
+from db.model import Forum, Message
 
 
 class ListForums(Resource):
     method_decorators = [is_researcher, insert_research, authenticate]
 
-    def __init__(self, **kwargs):
-        self.db = kwargs['db']
-        self.forums = self.db['forums']
-        self.users = self.db['users']
-        self.researches = self.db['researches']
-
-    def get(self, research, current_user):
-        forums = self.__find_forums(research)
-
+    def get(self, current_user, research):
         return ok(
             {
-                'forums': prettify_forums(self.users, forums)
+                'forums': prettify_forums(research.forums)
             }
         )
-
-    def __find_forums(self, research):
-        forums = self.forums.find(
-            {
-                'research': research['_id']
-            }
-        )
-        return forums
 
 
 class AddForum(Resource):
     method_decorators = [is_researcher, insert_research, validate_request, authenticate]
     required_fields = ['subject']  # used by validate_request
 
-    def __init__(self, **kwargs):
-        self.db = kwargs['db']
-        self.forums = self.db['forums']
-        self.researches = self.db['researches']
+    def post(self, current_user, research):
+        forum = Forum(current_user, research, request.json['subject'])
 
-    def post(self, research, current_user):
-        forum = self.__create(current_user, research)
-        forum_id = self.__save(forum)
-
+        db.save(forum)
         return created(
             {
-                'forum_id': str(forum_id)
+                'forum_id': forum.id
             }
         )
-
-    def __save(self, forum):
-        return self.forums.insert_one(forum).inserted_id
-
-    def __create(self, current_user, research):
-        json = request.json
-        return {
-            'createdBy': current_user.id(),
-            'created': datetime.now(),
-            'subject': json['subject'],
-            'research': str(research['_id'])
-        }
 
 
 class GetForum(Resource):
     method_decorators = [is_researcher, insert_forum, authenticate]
 
-    def __init__(self, **kwargs):
-        self.db = kwargs['db']
-        self.forums = self.db['forums']
-        self.messages = self.db['messages']
-        self.users = self.db['users']
-        self.researches = self.db['researches']
-
-    def get(self, forum, current_user):
-        messages = self.__find_messages(forum)
-
+    def get(self, current_user, forum):
         return ok(
             {
-                'forum': prettify_forum(self.users, forum),
-                'messages': prettify_messages(self.users, messages)
+                'forum': prettify_forum(forum),
+                'messages': prettify_messages(forum.messages)
             }
         )
-
-    def __find_messages(self, forum):
-        messages = self.messages.find(
-            {
-                'forum': forum['_id']
-            }
-        )
-        return messages
 
 
 class AddMessage(Resource):
     method_decorators = [is_researcher, insert_forum, validate_request, authenticate]
     required_fields = ['message']  # used by validate_request
 
-    def __init__(self, **kwargs):
-        self.db = kwargs['db']
-        self.forums = self.db['forums']
-        self.messages = self.db['messages']
-        self.researches = self.db['researches']
+    def post(self, current_user, forum):
+        message = Message(current_user, forum, request.json['message'])
 
-    def post(self, forum, current_user):
-        message = self.__create(current_user, forum)
-        message_id = self.__save(message)
-
+        db.save(message)
         return created(
             {
-                'message_id': str(message_id)
+                'message_id': message.id
             }
         )
-
-    def __save(self, message):
-        return self.messages.insert_one(message).inserted_id
-
-    def __create(self, current_user, forum):
-        json = request.json
-        return {
-            'createdBy': current_user.id(),
-            'created': datetime.now(),
-            'message': json['message'],
-            'forum': forum['_id']
-        }

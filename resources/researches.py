@@ -1,26 +1,20 @@
-from datetime import datetime
-
 from flask import request
 from flask.ext.restful import Resource
+
+from app import db
 from common.http_responses import ok, created
 from common.insert_wraps import insert_research
 from common.validation import validate_request
 from common.prettify_responses import prettify_researches, prettify_research
 from common.security import authenticate, is_supervisor
+from db.model import Research
 
 
 class ListResearches(Resource):
-    def __init__(self, **kwargs):
-        self.db = kwargs['db']
-        self.researches = self.db['researches']
-        self.users = self.db['users']
-
     def get(self):
-        researches = self.researches.find()
-
         return ok(
             {
-                'researches': prettify_researches(self.users, researches)
+                'researches': prettify_researches(db.all_researches())
             }
         )
 
@@ -28,78 +22,55 @@ class ListResearches(Resource):
 class GetResearch(Resource):
     method_decorators = [insert_research]
 
-    def __init__(self, **kwargs):
-        self.db = kwargs['db']
-        self.researches = self.db['researches']
-        self.users = self.db['users']
-
     def get(self, research):
-        return ok(prettify_research(self.users, research))
+        return ok(prettify_research(research))
 
 
 class AddResearch(Resource):
     method_decorators = [validate_request, authenticate]
     required_fields = ['title', 'area', 'description']  # used by validate_request
 
-    def __init__(self, **kwargs):
-        self.db = kwargs['db']
-        self.researches = self.db['researches']
-
     def post(self, current_user):
         research = self.__create(current_user, request.json)
-        research_id = self.__save(research)
 
+        db.save(research)
         return created(
             {
-                'research_id': str(research_id)
+                'research_id': research.id
             }
         )
 
-    def __save(self, research):
-        return self.researches.insert_one(research).inserted_id
-
     def __create(self, current_user, json):
         description = json['description']
+        title = json['title']
+        area = json['area']
+        image_url = json.get('image_url', None)
+        tags = json.get('tags', [])
+        brief_desc = description.get('brief', '')
+        detailed_desc = description.get('detailed', '')
 
-        return {
-            'supervisor': current_user.id(),
-            'created': datetime.now(),
-            'title': json['title'],
-            'tags': json.get('tags', []),
-            'area': json['area'],
-            'status': 'active',
-            'description': {
-                'brief': description.get('brief', ''),
-                'detailed': description.get('detailed', '')
-            },
-            'researchers': [],
-            'image_url': json.get('image_url', None)
-        }
+        return Research(current_user, title, area, tags, brief_desc, detailed_desc, image_url)
+
 
 class UpdateResearch(Resource):
     method_decorators = [is_supervisor, insert_research, authenticate]
 
-    def __init__(self, **kwargs):
-        self.db = kwargs['db']
-        self.researches = self.db['researches']
-
     def put(self, research, current_user):
         json = request.json
 
-        research['title'] = json.get('title', research['title'])
-        research['tags'] = json.get('tags', research['tags'])
-        research['area'] = json.get('area', research['area'])
-        research['status'] = json.get('status', research['status'])
-        research['image_url'] = json.get('image_url', research['image_url'])
-        research['description'] = json.get('description', research['description'])
+        research.title = json.get('title', research.title)
+        research.tags = json.get('tags', research.tags)
+        research.area = json.get('area', research.area)
+        research.status = json.get('status', research.status)
+        research.image_url = json.get('image_url', research.image_url)
 
-        research_id = self.__save(research)
+        description = json.get('description', {})
+        research.brief_desc = description.get('brief', research.brief_desc)
+        research.detailed_desc = description.get('detailed', research.detailed_desc)
 
+        db.update()
         return ok(
             {
-                'research_id': str(research_id)
+                'research_id': research.id
             }
         )
-
-    def __save(self, research):
-        return self.researches.save(research)

@@ -1,5 +1,7 @@
 from functools import wraps
+
 from flask import request
+
 from common.util import im_self
 
 

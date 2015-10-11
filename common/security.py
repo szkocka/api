@@ -1,9 +1,11 @@
 from functools import wraps
-from bson import ObjectId
+
 from flask import request
 from itsdangerous import SignatureExpired, BadSignature
+
+from app import db
 from common.http_responses import forbidden, unauthorized, bad_request
-from common.util import verify_token, generate_token, im_self
+from common.util import verify_token, generate_token
 
 
 class Token:
@@ -13,36 +15,8 @@ class Token:
     def json(self):
         return {'token': self.token}
 
-class CurrentUser:
-    def __init__(self, user):
-        self.user = {
-            '_id': str(user['_id']),
-            'name': user['name'],
-            'email': user['email'],
-            'provider': user['provider'],
-            'role': user['role']
-        }
-
-    def json(self):
-        return self.__dict__
-
-    def id(self):
-        return self.user['_id']
-
-    def email(self):
-        return self.user['email']
-
-    def name(self):
-        return self.user['name']
 
 def authenticate(func):
-    def __find_user(user_id):
-        users = im_self(func).db.users
-        return users.find_one(
-            {
-                '_id': ObjectId(user_id)
-            }
-        )
 
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -59,25 +33,18 @@ def authenticate(func):
         except BadSignature:
             return unauthorized('Invalid token.')
 
-        user = __find_user(user_id)
+        user = db.get_user(user_id)
 
-        if user is None:
+        if not user:
             return unauthorized('User not found.')
 
-        kwargs['current_user'] = CurrentUser(user)
+        kwargs['current_user'] = user
         return func(*args, **kwargs)
 
     return wrapper
 
-def is_researcher(func):
-    def __find_research(_id):
-        researches = im_self(func).db.researches
-        return researches.find_one(
-            {
-                '_id': ObjectId(_id)
-            }
-        )
 
+def is_researcher(func):
     def __is_researcher(research, current_user):
         researchers = research['researchers']
         return __is_supervisor(research, current_user) \
@@ -91,7 +58,7 @@ def is_researcher(func):
             research = kwargs['research']
         elif 'forum':
             forum = kwargs['forum']
-            research = __find_research(forum['research'])
+            research = forum.research
         else:
             return bad_request("Can't get info about research.")
 
@@ -99,7 +66,9 @@ def is_researcher(func):
             return forbidden('You must be researcher to call this API.')
 
         return func(*args, **kwargs)
+
     return wrapper
+
 
 def is_supervisor(func):
     @wraps(func)
@@ -111,7 +80,9 @@ def is_supervisor(func):
             return forbidden('You must be supervisor to call this API.')
 
         return func(*args, **kwargs)
+
     return wrapper
 
+
 def __is_supervisor(research, current_user):
-    return current_user.id() == research['supervisor']
+    return current_user.id() == research.supervisor.id

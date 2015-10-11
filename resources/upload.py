@@ -2,18 +2,16 @@ from boto.s3.key import boto
 from bson import ObjectId
 from flask import request
 from flask.ext.restful import Resource
-from common.http_responses import created
 
+from common.http_responses import created
 from common.security import authenticate
 
 BUCKET_NAME = 'srg-images'
 IMAGE_TYPE = 'image/jpeg'
 
+
 class Upload(Resource):
     method_decorators = [authenticate]
-
-    def __init__(self, **kwargs):
-        self.db = kwargs['db']
 
     def post(self, current_user):
         uploaded_file = request.files['file']
