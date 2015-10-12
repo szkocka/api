@@ -7,8 +7,6 @@
 Flask
 flask-restful
 flask-cors
-boto
-pystache
 SQLAlchemy
 Flask_SQLAlchemy
-PyMySQL
+pystache

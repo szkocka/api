@@ -6,14 +6,14 @@ from common.validation import validate_request
 from common.prettify_responses import prettify_news
 from common.security import authenticate
 from db.model import News
-from db.repository import save
+from db.repository import save, all_news
 
 
 class ListNews(Resource):
     def get(self):
         return ok(
             {
-                'news': prettify_news(db.all_news())
+                'news': prettify_news(all_news())
             }
         )
 

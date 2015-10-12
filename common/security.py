@@ -85,4 +85,4 @@ def is_supervisor(func):
 
 
 def __is_supervisor(research, current_user):
-    return current_user.id() == research.supervisor.id
+    return current_user.id == research.supervisor.id

@@ -7,14 +7,14 @@ from common.validation import validate_request
 from common.prettify_responses import prettify_researches, prettify_research
 from common.security import authenticate, is_supervisor
 from db.model import Research
-from db.repository import update, save
+from db.repository import update, save, all_researches
 
 
 class ListResearches(Resource):
     def get(self):
         return ok(
             {
-                'researches': prettify_researches(db.all_researches())
+                'researches': prettify_researches(all_researches())
             }
         )
 
