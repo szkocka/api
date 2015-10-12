@@ -1,16 +1,18 @@
-import boto.ses
+import logging
+from google.appengine.api import mail
 import pystache
-import boto.pyami.config
+
+FROM_EMAIL = 'SENDER_EMAIL'
 
 
 class Mailer:
     def __init__(self):
         self.renderer = pystache.Renderer()
-        self.from_email = 'kavf.mukola@gmail.com'
-        self.connection = boto.ses.connect_to_region('eu-west-1')
 
-    def send(self, subj_view, body_view, recipients):
+    def send(self, subj_view, body_view, recipient):
         subj = self.renderer.render(subj_view)
         body = self.renderer.render(body_view)
 
-        self.connection.send_email(self.from_email, subj, body, recipients)
+        logging.info('Sending email')
+        mail.send_mail(sender=FROM_EMAIL, to=recipient,
+                       subject=subj, body=body)
