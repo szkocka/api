@@ -10,4 +10,6 @@ handlers:
 
 libraries:
 - name: MySQLdb
-  version: "latest"
+  version: latest
+- name: pycrypto
+  version: latest

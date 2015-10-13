@@ -1,27 +1,27 @@
+from flask import request
 from flask.ext.restful import Resource
+from gcloud import storage
 
 from common.http_responses import created
 from common.security import authenticate
 
-BUCKET_NAME = 'srg-images'
+BUCKET_NAME = 'szkocka-images-test'
 IMAGE_TYPE = 'image/jpeg'
+PROJECT_ID = 'szkocka-1080'
 
 
 class Upload(Resource):
-    method_decorators = [authenticate]
+    #method_decorators = [authenticate]
 
-    def post(self, current_user):
-        #uploaded_file = request.files['file']
-
-        #s3connection = boto.connect_s3()
-        #bucket = s3connection.get_bucket(BUCKET_NAME)
-        #key = bucket.new_key('{0}.jpg'.format(str(ObjectId())))
-        #key.content_type = IMAGE_TYPE
-        #key.set_contents_from_file(uploaded_file)
-        #key.make_public()
+    def post(self):
+        uploaded_file = request.files['file']
+        client = storage.Client(project=PROJECT_ID)
+        bucket = client.get_bucket(BUCKET_NAME)
+        blob = bucket.blob('my-test-file.jpg')
+        blob.upload_from_file(uploaded_file, content_type=IMAGE_TYPE)
 
         return created(
             {
-                'url': ''#key.generate_url(expires_in=0, query_auth=False, force_http=True)
+                'url': blob.public_url
             }
         )

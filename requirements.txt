@@ -10,3 +10,4 @@ flask-cors
 SQLAlchemy
 Flask_SQLAlchemy
 pystache
+gcloud
