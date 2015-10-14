@@ -1,3 +1,5 @@
+import sys
+import uuid
 from flask import request
 from flask.ext.restful import Resource
 from gcloud import storage
@@ -6,7 +8,6 @@ from common.http_responses import created
 from common.security import authenticate
 
 BUCKET_NAME = 'szkocka-images-test'
-IMAGE_TYPE = 'image/jpeg'
 PROJECT_ID = 'szkocka-1080'
 
 
@@ -17,11 +18,18 @@ class Upload(Resource):
         uploaded_file = request.files['file']
         client = storage.Client(project=PROJECT_ID)
         bucket = client.get_bucket(BUCKET_NAME)
-        blob = bucket.blob('my-test-file.jpg')
-        blob.upload_from_file(uploaded_file, content_type=IMAGE_TYPE)
+
+        blob = bucket.blob('{0}.jpg'.format(str(uuid.uuid1())))
+        blob.upload_from_file(uploaded_file,
+                              content_type=uploaded_file.content_type,
+                              size=uploaded_file.__sizeof__())
+        blob.make_public()
+
+        https_url = blob.public_url
+        http_url = https_url.replace('https://', 'http://')
 
         return created(
             {
-                'url': blob.public_url
+                'url': http_url
             }
         )
