@@ -1,4 +1,3 @@
-import sys
 import uuid
 from flask import request
 from flask.ext.restful import Resource
@@ -12,7 +11,7 @@ PROJECT_ID = 'szkocka-1080'
 
 
 class Upload(Resource):
-    #method_decorators = [authenticate]
+    method_decorators = [authenticate]
 
     def post(self):
         uploaded_file = request.files['file']

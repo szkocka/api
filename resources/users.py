@@ -5,8 +5,8 @@ from common.http_responses import bad_request, created
 from common.util import hash_password
 from common.validation import validate_request
 from common.security import Token
-from db.model import User
-from db.repository import find_user_by_email, save
+from db.model import User, InvitedResearcher
+from db.repository import find_user_by_email, save, get_research, update, find_invited_researchers_by_email, delete
 
 
 class CreateUser(Resource):
@@ -28,3 +28,12 @@ class CreateUser(Resource):
 
         save(user)
         return created(Token(user.id).json())
+
+
+    def add_to_researches(self, user):
+        invited_researchers = find_invited_researchers_by_email(user.email)
+
+        for invited_researcher in invited_researchers:
+            research = invited_researcher.research
+            user.researches.append(research)
+            delete(invited_researcher)

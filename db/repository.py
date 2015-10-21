@@ -1,4 +1,4 @@
-from db.model import User, News, Forum, Research, db
+from db.model import User, News, Forum, Research, db, InvitedResearcher
 
 
 def save(obj):
@@ -8,6 +8,15 @@ def save(obj):
 
 def update():
     db.session.commit()
+
+
+def delete(obj):
+    db.session.delete(obj)
+    db.session.commit()
+
+
+def find_invited_researchers_by_email(email):
+    return InvitedResearcher.query.filter_by(email=email)
 
 
 def find_user_by_email(email):
@@ -36,3 +45,4 @@ def get_research(_id):
 
 def get_forum(_id):
     return Forum.query.get(_id)
+

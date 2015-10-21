@@ -29,6 +29,12 @@ class User(db.Model):
         self.hashed_password = hashed_password
         self.is_admin = False
 
+    def is_supervisor_of(self, research):
+        return self.id == research.supervisor.id
+
+    def is_researcher_of(self, research):
+        return research in set(self.researches)
+
 
 class Research(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -43,6 +49,7 @@ class Research(db.Model):
     image_url = db.Column(db.String(1024))
 
     forums = db.relationship('Forum', backref='research', lazy='dynamic')
+    invited_researchers = db.relationship('InvitedResearcher', backref='research', lazy='dynamic')
 
     def __init__(self, supervisor, title, area, tags, brief_desc, detailed_desc, image_url):
         self.supervisor_id = supervisor.id
@@ -54,6 +61,16 @@ class Research(db.Model):
         self.brief_desc = brief_desc
         self.detailed_desc = detailed_desc
         self.image_url = image_url
+
+
+class InvitedResearcher(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    research_id = db.Column(db.Integer, db.ForeignKey('research.id'))
+    email = db.Column(db.String(128))
+
+    def __init__(self, research, email):
+        self.research_id = research.id
+        self.email = email
 
 
 class Forum(db.Model):

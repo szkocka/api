@@ -42,7 +42,7 @@ def prettify_research(research):
             'brief': research.brief_desc,
             'detailed': research.detailed_desc
         },
-        'researchers': map(lambda r: r.id, list(research.researchers)),
+        'researchers': map(prettify_user, research.researchers),
         'image_url': research.image_url,
     }
 
