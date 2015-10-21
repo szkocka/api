@@ -55,7 +55,7 @@ class Research(db.Model):
         self.supervisor_id = supervisor.id
         self.creation_time = datetime.now()
         self.title = title
-        self.tags = str(tags)
+        self.tags = ','.join(map(lambda tag: tag.strip(), tags))
         self.area = area
         self.status = 'active'
         self.brief_desc = brief_desc

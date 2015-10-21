@@ -35,7 +35,7 @@ def prettify_research(research):
         'supervisor': prettify_user(research.supervisor),
         'created': research.creation_time.strftime('%Y-%m-%d %H:%M:%S'),
         'title': research.title,
-        'tags': research.tags,
+        'tags': research.tags.split(','),
         'area': research.area,
         'status': research.status,
         'description': {
