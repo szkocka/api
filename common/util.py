@@ -1,9 +1,9 @@
 import hashlib
 from itsdangerous import TimedJSONWebSignatureSerializer
 import inspect
+from init import config
 
-SECRET_KEY = "qwertyuiopasdfghjklzxcvbnm"
-TOKEN_SERIALIZER = TimedJSONWebSignatureSerializer(SECRET_KEY, expires_in=36000)
+TOKEN_SERIALIZER = TimedJSONWebSignatureSerializer(config.TOKEN_SECRET_KEY, expires_in=36000)
 
 
 def generate_token(user_id):

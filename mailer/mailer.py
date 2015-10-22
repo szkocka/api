@@ -1,8 +1,7 @@
 import logging
 from google.appengine.api import mail
 import pystache
-
-FROM_EMAIL = 'SENDER_EMAIL'
+from init import config
 
 
 class Mailer:
@@ -14,5 +13,5 @@ class Mailer:
         body = self.renderer.render(body_view)
 
         logging.info('Sending email')
-        mail.send_mail(sender=FROM_EMAIL, to=recipient,
+        mail.send_mail(sender=config.FROM_EMAIL, to=recipient,
                        subject=subj, body=body)

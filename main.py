@@ -1,8 +1,5 @@
 """`main` is the top level module for your Flask application."""
-from flask import Flask
-from flask.ext.cors import CORS
-from flask.ext.restful import Api
-from db.model import db
+from init import api
 
 from resources.auth import AuthLocalLogin
 from resources.emails import ReqToJoinResearch, InviteToJoinResearch
@@ -13,15 +10,6 @@ from resources.researches import AddResearch, ListResearches, GetResearch, Updat
 from resources.upload import Upload
 from resources.users import CreateUser
 
-app = Flask(__name__)
-
-app.config.from_object('config')
-db.init_app(app)
-
-CORS(app)
-api = Api(app)
-# Note: We don't need to call run() since our application is embedded within
-# the App Engine WSGI application server.
 
 api.add_resource(AddNews, '/news')
 api.add_resource(ListNews, '/news')
