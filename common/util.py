@@ -1,9 +1,9 @@
 import hashlib
 from itsdangerous import TimedJSONWebSignatureSerializer
 import inspect
-from init import config
+from flask import current_app as app
 
-TOKEN_SERIALIZER = TimedJSONWebSignatureSerializer(config.TOKEN_SECRET_KEY, expires_in=36000)
+TOKEN_SERIALIZER = TimedJSONWebSignatureSerializer(app.config.TOKEN_SECRET_KEY, expires_in=36000)
 
 
 def generate_token(user_id):

@@ -6,7 +6,7 @@ from gcloud import storage
 from common.http_responses import created
 from common.security import authenticate
 
-from init import config
+from flask import current_app as app
 
 
 class Upload(Resource):
@@ -14,8 +14,8 @@ class Upload(Resource):
 
     def post(self):
         uploaded_file = request.files['file']
-        client = storage.Client(project=config.PROJECT_ID)
-        bucket = client.get_bucket(config.BUCKET_NAME)
+        client = storage.Client(project=app.config.PROJECT_ID)
+        bucket = client.get_bucket(app.config.BUCKET_NAME)
 
         blob = bucket.blob('{0}.jpg'.format(str(uuid.uuid1())))
         blob.upload_from_file(uploaded_file,
