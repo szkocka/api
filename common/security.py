@@ -1,23 +1,25 @@
 from functools import wraps
 
 from flask import request
+from flask import current_app as app
 from itsdangerous import SignatureExpired, BadSignature
 
 from common.http_responses import forbidden, unauthorized, bad_request
-from common.util import verify_token, generate_token
+from common.util import TokenUtil
 from db.repository import get_user
+
+TOKEN_UTIL = TokenUtil()
 
 
 class Token:
     def __init__(self, user_id):
-        self.token = generate_token(user_id)
+        self.token = TOKEN_UTIL.generate(user_id, app.config.SEKRET_KEY)
 
     def json(self):
         return {'token': self.token}
 
 
 def authenticate(func):
-
     @wraps(func)
     def wrapper(*args, **kwargs):
 
@@ -27,7 +29,7 @@ def authenticate(func):
         authorization = request.headers['Authorization']
         token = authorization.replace('Bearer ', '')
         try:
-            user_id = verify_token(token)
+            user_id = TOKEN_UTIL.verify(token, app.config.SEKRET_KEY)
         except SignatureExpired:
             return unauthorized('Token expired.')
         except BadSignature:

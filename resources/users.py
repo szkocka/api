@@ -14,8 +14,6 @@ class CreateUser(Resource):
     required_fields = ['email', 'name', 'password']  # used by validate_request
 
     def post(self):
-        #sql.create_all()
-
         email = request.json['email']
 
         if find_user_by_email(email):

@@ -28,7 +28,7 @@ def find_user(email, hashed_pass):
 
 
 def all_news():
-    return News.query.all().order_by(News.created.desc())
+    return News.query.order_by(News.creation_time.desc()).all()
 
 
 def all_researches():
