@@ -12,10 +12,10 @@ from flask import current_app as app
 class Upload(Resource):
     method_decorators = [authenticate]
 
-    def post(self):
+    def post(self, current_user):
         uploaded_file = request.files['file']
-        client = storage.Client(project=app.config.PROJECT_ID)
-        bucket = client.get_bucket(app.config.BUCKET_NAME)
+        client = storage.Client(project=app.config['PROJECT_ID'])
+        bucket = client.get_bucket(app.config['BUCKET_NAME'])
 
         blob = bucket.blob('{0}.jpg'.format(str(uuid.uuid1())))
         blob.upload_from_file(uploaded_file,

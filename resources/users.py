@@ -25,10 +25,12 @@ class CreateUser(Resource):
         user = User(name, email, hashed_pass)
 
         save(user)
+        self.__add_to_researches(user)
+
         return created(Token(user.id).json())
 
 
-    def add_to_researches(self, user):
+    def __add_to_researches(self, user):
         invited_researchers = find_invited_researchers_by_email(user.email)
 
         for invited_researcher in invited_researchers:

@@ -28,7 +28,7 @@ class InviteToJoinResearch(Resource):
             update()
             researcher = user.name
         else:
-            save(InvitedResearcher(user, email))
+            save(InvitedResearcher(research, email))
             researcher = email
 
         self.__send_invite(supervisor, researcher, email, research, text)
@@ -49,7 +49,7 @@ class ReqToJoinResearch(Resource):
 
     def post(self, research, current_user):
         text = request.json.get('text', '')
-        title = research['title']
+        title = research.title
         supervisor = research.supervisor
         user_name = current_user.name
 

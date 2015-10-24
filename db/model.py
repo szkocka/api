@@ -98,7 +98,7 @@ class Message(db.Model):
 
     def __init__(self, creator, forum, message):
         self.creator_id = creator.id
-        self.forum = forum.id
+        self.forum_id = forum.id
         self.creation_time = datetime.now()
         self.message = message
 

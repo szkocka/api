@@ -60,6 +60,10 @@ class UpdateResearch(Resource):
 
         research.title = json.get('title', research.title)
         research.tags = json.get('tags', research.tags)
+
+        if 'tags' in json:
+            research.tags = ','.join(map(lambda tag: tag.strip(), json['tags']))
+
         research.area = json.get('area', research.area)
         research.status = json.get('status', research.status)
         research.image_url = json.get('image_url', research.image_url)

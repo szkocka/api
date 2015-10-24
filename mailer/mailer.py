@@ -13,5 +13,5 @@ class Mailer:
         body = self.renderer.render(body_view)
 
         logging.info('Sending email')
-        mail.send_mail(sender=app.config.FROM_EMAIL, to=recipient,
+        mail.send_mail(sender=app.config['FROM_EMAIL'], to=recipient,
                        subject=subj, body=body)
