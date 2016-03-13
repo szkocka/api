@@ -5,8 +5,7 @@ from common.http_responses import ok_msg
 from common.insert_wraps import insert_research
 from common.validation import validate_request
 from common.security import authenticate, is_supervisor
-from db.model import InvitedResearcher
-from db.repository import find_user_by_email, update, save
+from db.model import InvitedResearcher, User
 from mailer.mailer import Mailer
 from mailer.views import InviteToJoinSubj, InviteToJoin, ReqToJoinSubj, ReqToJoin
 
@@ -22,13 +21,14 @@ class InviteToJoinResearch(Resource):
         text = request.json.get('text', '')
         supervisor = current_user.name
 
-        user = find_user_by_email(email)
+        user = User.by_email(email)
         if user:
-            research.researchers.append(user)
-            update()
+            research.researchers.append(user.key())
+            research.put()
             researcher = user.name
         else:
-            save(InvitedResearcher(research, email))
+            ir = InvitedResearcher(research, email)
+            ir.put()
             researcher = email
 
         self.__send_invite(supervisor, researcher, email, research, text)

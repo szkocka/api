@@ -7,7 +7,6 @@ from common.prettify_responses import prettify_forums, prettify_forum, prettify_
 from common.validation import validate_request
 from common.security import authenticate, is_researcher
 from db.model import Forum, Message
-from db.repository import save
 
 
 class ListForums(Resource):
@@ -26,12 +25,13 @@ class AddForum(Resource):
     required_fields = ['subject']  # used by validate_request
 
     def post(self, current_user, research):
-        forum = Forum(current_user, research, request.json['subject'])
+        forum = Forum(creator_id=current_user.key(),
+                      research_id=research.key(),
+                      subject=request.json['subject'])
 
-        save(forum)
         return created(
             {
-                'forum_id': forum.id
+                'forum_id': forum.put().id()
             }
         )
 
@@ -53,11 +53,13 @@ class AddMessage(Resource):
     required_fields = ['message']  # used by validate_request
 
     def post(self, current_user, forum):
-        message = Message(current_user, forum, request.json['message'])
+        message = Message(
+                creator_id=current_user.key(),
+                forum_id=forum.key(),
+                message=request.json['message'])
 
-        save(message)
         return created(
             {
-                'message_id': message.id
+                'message_id': message.put().id()
             }
         )

@@ -6,7 +6,6 @@ from common.util import hash_password
 from common.validation import validate_request
 from common.security import Token
 from db.model import User, InvitedResearcher
-from db.repository import find_user_by_email, save, get_research, update, find_invited_researchers_by_email, delete
 
 
 class CreateUser(Resource):
@@ -16,7 +15,7 @@ class CreateUser(Resource):
     def post(self):
         email = request.json['email']
 
-        if find_user_by_email(email):
+        if User.by_email(email):
             return bad_request('User with email {0} already exists'.format(email))
 
         name = request.json['name']
@@ -24,16 +23,16 @@ class CreateUser(Resource):
 
         user = User(name, email, hashed_pass)
 
-        save(user)
+        user_key = user.put()
         self.__add_to_researches(user)
 
-        return created(Token(user.id).json())
+        return created(Token(user_key.id()).json())
 
 
     def __add_to_researches(self, user):
-        invited_researchers = find_invited_researchers_by_email(user.email)
+        invited_researchers = InvitedResearcher.by_email(user.email)
 
         for invited_researcher in invited_researchers:
             research = invited_researcher.research
             user.researches.append(research)
-            delete(invited_researcher)
+            invited_researcher.key().delete()

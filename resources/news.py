@@ -6,14 +6,13 @@ from common.validation import validate_request
 from common.prettify_responses import prettify_news
 from common.security import authenticate
 from db.model import News
-from db.repository import save, all_news
 
 
 class ListNews(Resource):
     def get(self):
         return ok(
             {
-                'news': prettify_news(all_news())
+                'news': prettify_news(News.all())
             }
         )
 
@@ -26,11 +25,12 @@ class AddNews(Resource):
         title = request.json["title"]
         body = request.json["body"]
 
-        news = News(current_user, title, body)
+        news = News(cretor_id=current_user.key(),
+                    title=title,
+                    body=body)
 
-        save(news)
         return created(
             {
-                'news_id': news.id
+                'news_id': news.put().id()
             }
         )

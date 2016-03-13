@@ -1,7 +1,7 @@
 from functools import wraps
 
 from common.http_responses import bad_request, forum_not_found, research_not_found
-from db.repository import get_research, get_forum
+from db.model import Forum, Research
 
 
 def insert_research(func):
@@ -11,7 +11,7 @@ def insert_research(func):
             return bad_request('To use insert_research wrapper research_id must be in url.')
 
         _id = kwargs['research_id']
-        research = get_research(_id)
+        research = Research.get(_id)
 
         if research is None:
             return research_not_found(_id)
@@ -30,7 +30,7 @@ def insert_forum(func):
             return bad_request('To use insert_forum wrapper forum_id must be in url.')
 
         _id = kwargs['forum_id']
-        forum = get_forum(_id)
+        forum = Forum.get(_id)
 
         if forum is None:
             return forum_not_found(_id)

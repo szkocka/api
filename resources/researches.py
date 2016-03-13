@@ -7,14 +7,13 @@ from common.validation import validate_request
 from common.prettify_responses import prettify_researches, prettify_research
 from common.security import authenticate, is_supervisor
 from db.model import Research
-from db.repository import update, save, all_researches
 
 
 class ListResearches(Resource):
     def get(self):
         return ok(
             {
-                'researches': prettify_researches(all_researches())
+                'researches': prettify_researches(Research.all())
             }
         )
 
@@ -33,10 +32,9 @@ class AddResearch(Resource):
     def post(self, current_user):
         research = self.__create(current_user, request.json)
 
-        save(research)
         return created(
             {
-                'research_id': research.id
+                'research_id': research.put().id()
             }
         )
 
@@ -49,7 +47,14 @@ class AddResearch(Resource):
         brief_desc = description.get('brief', '')
         detailed_desc = description.get('detailed', '')
 
-        return Research(current_user, title, area, tags, brief_desc, detailed_desc, image_url)
+        return Research(
+                supervisor_id=current_user.key(),
+                title=title,
+                area=area,
+                tags=tags,
+                brief_desc=brief_desc,
+                detailed_desc=detailed_desc,
+                image_url=image_url)
 
 
 class UpdateResearch(Resource):
@@ -61,9 +66,7 @@ class UpdateResearch(Resource):
         research.title = json.get('title', research.title)
         research.tags = json.get('tags', research.tags)
 
-        if 'tags' in json:
-            research.tags = ','.join(map(lambda tag: tag.strip(), json['tags']))
-
+        research.tags = json.get('tags', research.tags)
         research.area = json.get('area', research.area)
         research.status = json.get('status', research.status)
         research.image_url = json.get('image_url', research.image_url)
@@ -72,9 +75,8 @@ class UpdateResearch(Resource):
         research.brief_desc = description.get('brief', research.brief_desc)
         research.detailed_desc = description.get('detailed', research.detailed_desc)
 
-        update()
         return ok(
             {
-                'research_id': research.id
+                'research_id': research.put().id()
             }
         )

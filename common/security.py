@@ -6,7 +6,7 @@ from itsdangerous import SignatureExpired, BadSignature
 
 from common.http_responses import forbidden, unauthorized, bad_request
 from common.util import TokenUtil
-from db.repository import get_user
+from db.model import User
 
 TOKEN_UTIL = TokenUtil()
 
@@ -35,7 +35,7 @@ def authenticate(func):
         except BadSignature:
             return unauthorized('Invalid token.')
 
-        user = get_user(user_id)
+        user = User.get(user_id)
 
         if not user:
             return unauthorized('User not found.')

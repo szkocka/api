@@ -1,33 +1,24 @@
-from datetime import datetime
-from flask.ext.sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
+from google.appengine.ext import ndb
 
 
-researches = db.Table('research_to_user',
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('research_id', db.Integer, db.ForeignKey('research.id'))
-)
+class User(ndb.Model):
+    name = ndb.StringProperty()
+    email = ndb.StringProperty()
+    is_admin = ndb.BooleanProperty()
+    hashed_password = ndb.StringProperty()
 
+    @classmethod
+    def get(cls, _id):
+        return cls.get_by_id(_id)
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(128))
-    email = db.Column(db.String(128), unique=True)
-    is_admin = db.Column(db.Boolean())
-    hashed_password = db.Column(db.String(64))
+    @classmethod
+    def by_email(cls, email):
+        return cls.query(User.email == email)
 
-    forums = db.relationship('Forum', backref='creator', lazy='dynamic')
-    messages = db.relationship('Message', backref='creator', lazy='dynamic')
-    news = db.relationship('News', backref='creator', lazy='dynamic')
-    supervise = db.relationship('Research', backref='supervisor', lazy='dynamic')
-    researches = db.relationship('Research', secondary=researches, backref=db.backref('researchers', lazy='dynamic'))
-
-    def __init__(self, name, email, hashed_password):
-        self.name = name
-        self.email = email
-        self.hashed_password = hashed_password
-        self.is_admin = False
+    @classmethod
+    def by_email_and_password(cls, email, password):
+        return cls.query(cls.email == email,
+                         cls.hashed_password == password)
 
     def is_supervisor_of(self, research):
         return self.id == research.supervisor.id
@@ -36,82 +27,60 @@ class User(db.Model):
         return research in set(self.researches)
 
 
-class Research(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    supervisor_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    title = db.Column(db.String(1024))
-    area = db.Column(db.String(128))
-    status = db.Column(db.String(64))
-    creation_time = db.Column(db.DateTime)
-    brief_desc = db.Column(db.Text)
-    detailed_desc = db.Column(db.Text)
-    tags = db.Column(db.String(128))
-    image_url = db.Column(db.String(1024))
+class Research(ndb.Model):
+    supervisor_id = ndb.KeyProperty(kind=User)
+    title = ndb.TextProperty()
+    area = ndb.StringProperty()
+    status = ndb.StringProperty()
+    creation_time = ndb.DateTimeProperty(auto_now_add=True)
+    brief_desc = ndb.TextProperty()
+    detailed_desc = ndb.TextProperty()
+    tags = ndb.StringProperty(repeated=True)
+    image_url = ndb.StringProperty()
+    researchers = ndb.KeyProperty(kind=User, repeated=True)
 
-    forums = db.relationship('Forum', backref='research', lazy='dynamic')
-    invited_researchers = db.relationship('InvitedResearcher', backref='research', lazy='dynamic')
+    @classmethod
+    def get(cls, _id):
+        return cls.get_by_id(_id)
 
-    def __init__(self, supervisor, title, area, tags, brief_desc, detailed_desc, image_url):
-        self.supervisor_id = supervisor.id
-        self.creation_time = datetime.now()
-        self.title = title
-        self.tags = ','.join(map(lambda tag: tag.strip(), tags))
-        self.area = area
-        self.status = 'active'
-        self.brief_desc = brief_desc
-        self.detailed_desc = detailed_desc
-        self.image_url = image_url
+    @classmethod
+    def all(cls):
+        return cls.query().fetch(100)
 
 
-class InvitedResearcher(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    research_id = db.Column(db.Integer, db.ForeignKey('research.id'))
-    email = db.Column(db.String(128))
+class InvitedResearcher(ndb.Model):
+    research_id = ndb.KeyProperty(kind='Research')
+    email = ndb.StringProperty()
 
-    def __init__(self, research, email):
-        self.research_id = research.id
-        self.email = email
-
-
-class Forum(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    creator_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    research_id = db.Column(db.Integer, db.ForeignKey('research.id'))
-    subject = db.Column(db.Text)
-    creation_time = db.Column(db.DateTime)
-
-    messages = db.relationship('Message', backref='forum', lazy='dynamic')
-
-    def __init__(self, creator, research, subject):
-        self.creator_id = creator.id
-        self.research_id = research.id
-        self.creation_time = datetime.now()
-        self.subject = subject
+    @classmethod
+    def by_email(cls, email):
+        return cls.query(cls.email == email)
 
 
-class Message(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    creator_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    forum_id = db.Column(db.Integer, db.ForeignKey('forum.id'))
-    message = db.Column(db.Text)
-    creation_time = db.Column(db.DateTime)
+class Forum(ndb.Model):
+    creator_id = ndb.KeyProperty(kind='User')
+    research_id = ndb.KeyProperty(kind='Research')
+    subject = ndb.TextProperty()
+    creation_time = ndb.DateTimeProperty(auto_now_add=True)
 
-    def __init__(self, creator, forum, message):
-        self.creator_id = creator.id
-        self.forum_id = forum.id
-        self.creation_time = datetime.now()
-        self.message = message
+    @classmethod
+    def get(cls, _id):
+        return cls.get_by_id(_id)
 
 
-class News(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    creator_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    title = db.Column(db.String(1024))
-    body = db.Column(db.Text)
-    creation_time = db.Column(db.DateTime)
+class Message(ndb.Model):
+    creator_id = ndb.KeyProperty(kind='User')
+    forum_id = ndb.KeyProperty(kind='Forum')
+    message = ndb.TextProperty()
+    creation_time = ndb.DateTimeProperty(auto_now_add=True)
 
-    def __init__(self, creator, title, body):
-        self.creator_id = creator.id
-        self.creation_time = datetime.now()
-        self.title = title
-        self.body = body
+
+class News(ndb.Model):
+    creator_id = ndb.KeyProperty(kind='User')
+    title = ndb.TextProperty()
+    body = ndb.TextProperty()
+    creation_time = ndb.DateTimeProperty(auto_now_add=True)
+
+    @classmethod
+    def all(cls):
+        return cls.query().order(-cls.creation_time)

@@ -2,7 +2,6 @@
 from flask import Flask
 from flask.ext.cors import CORS
 from flask.ext.restful import Api
-from db.model import db
 from init import add_resources
 
 app = Flask(__name__)
@@ -10,7 +9,6 @@ app = Flask(__name__)
 config = app.config
 config.from_pyfile('app.properties')
 
-db.init_app(app)
 
 CORS(app)
 api = Api(app)
