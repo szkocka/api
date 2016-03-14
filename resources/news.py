@@ -25,7 +25,7 @@ class AddNews(Resource):
         title = request.json["title"]
         body = request.json["body"]
 
-        news = News(cretor_id=current_user.key(),
+        news = News(creator_key=current_user.key,
                     title=title,
                     body=body)
 

@@ -13,9 +13,10 @@ class ListForums(Resource):
     method_decorators = [is_researcher, insert_research, authenticate]
 
     def get(self, current_user, research):
+        forums = Forum.by_research(research.key)
         return ok(
             {
-                'forums': prettify_forums(research.forums)
+                'forums': prettify_forums(forums)
             }
         )
 
@@ -25,8 +26,8 @@ class AddForum(Resource):
     required_fields = ['subject']  # used by validate_request
 
     def post(self, current_user, research):
-        forum = Forum(creator_id=current_user.key(),
-                      research_id=research.key(),
+        forum = Forum(creator_key=current_user.key,
+                      research_key=research.key,
                       subject=request.json['subject'])
 
         return created(
@@ -40,10 +41,11 @@ class GetForum(Resource):
     method_decorators = [is_researcher, insert_forum, authenticate]
 
     def get(self, current_user, forum):
+        messages = Message.by_forum(forum.key)
         return ok(
             {
                 'forum': prettify_forum(forum),
-                'messages': prettify_messages(forum.messages)
+                'messages': prettify_messages(messages)
             }
         )
 
@@ -54,9 +56,9 @@ class AddMessage(Resource):
 
     def post(self, current_user, forum):
         message = Message(
-                creator_id=current_user.key(),
-                forum_id=forum.key(),
-                message=request.json['message'])
+                creator_key=current_user.key,
+                forum_key=forum.key,
+                text=request.json['message'])
 
         return created(
             {

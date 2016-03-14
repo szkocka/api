@@ -1,3 +1,4 @@
+from resources.async.async import ProcessResearchers
 from resources.auth import AuthLocalLogin
 from resources.emails import ReqToJoinResearch, InviteToJoinResearch
 from resources.forums import AddForum, ListForums, AddMessage, GetForum
@@ -25,3 +26,5 @@ def add_resources(api):
     api.add_resource(AuthLocalLogin, '/auth/local')
     api.add_resource(Me, '/users/me')
     api.add_resource(Upload, '/upload')
+
+    api.add_resource(ProcessResearchers, '/async/process-researchers')

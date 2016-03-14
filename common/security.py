@@ -35,7 +35,7 @@ def authenticate(func):
         except BadSignature:
             return unauthorized('Invalid token.')
 
-        user = User.get(user_id)
+        user = User.get(int(user_id))
 
         if not user:
             return unauthorized('User not found.')
@@ -58,7 +58,7 @@ def is_researcher(func):
             research = kwargs['research']
         elif 'forum':
             forum = kwargs['forum']
-            research = forum.research
+            research = forum.research_key.get()
         else:
             return bad_request("Can't get info about research.")
 

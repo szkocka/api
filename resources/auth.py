@@ -20,4 +20,4 @@ class AuthLocalLogin(Resource):
         if not user:
             return unauthorized('User not found.')
 
-        return ok(Token(user.id).json())
+        return ok(Token(user.key.id()).json())

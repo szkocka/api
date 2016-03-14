@@ -1,3 +1,5 @@
+import json
+
 from flask import request
 from flask.ext.restful import Resource
 
@@ -5,11 +7,8 @@ from common.http_responses import ok_msg
 from common.insert_wraps import insert_research
 from common.validation import validate_request
 from common.security import authenticate, is_supervisor
-from db.model import InvitedResearcher, User
-from mailer.mailer import Mailer
-from mailer.views import InviteToJoinSubj, InviteToJoin, ReqToJoinSubj, ReqToJoin
-
-mailer = Mailer()
+from db.model import ResearchInvite, User
+from google.appengine.api import taskqueue
 
 
 class InviteToJoinResearch(Resource):
@@ -23,38 +22,78 @@ class InviteToJoinResearch(Resource):
 
         user = User.by_email(email)
         if user:
-            research.researchers.append(user.key())
+            research.researchers_keys.append(user.key())
             research.put()
             researcher = user.name
         else:
-            ir = InvitedResearcher(research, email)
-            ir.put()
+            ResearchInvite(research, email).put()
             researcher = email
 
-        self.__send_invite(supervisor, researcher, email, research, text)
+        email_payload = {
+            'researcher': researcher,
+            'supervisor': supervisor,
+            'recipient': email,
+            'title': research.title,
+            'description': research.brief_desc,
+            'text': text
+        }
+
+        send(
+            InviteToJoinSubj(email_payload),
+            InviteToJoin(email_payload),
+            email
+        )
 
         return ok_msg("Invitation send to {0}".format(email))
-
-    def __send_invite(self, supervisor, researcher, email, research, text):
-        title = research.title
-        description = research.brief_desc
-
-        mailer.send(
-            InviteToJoinSubj(supervisor, title),
-            InviteToJoin(supervisor, title, description, researcher, text), email)
 
 
 class ReqToJoinResearch(Resource):
     method_decorators = [insert_research, authenticate]
 
     def post(self, research, current_user):
-        text = request.json.get('text', '')
-        title = research.title
         supervisor = research.supervisor
-        user_name = current_user.name
 
-        mailer.send(
-            ReqToJoinSubj(user_name, title),
-            ReqToJoin(supervisor.name, user_name, title, text), supervisor.email)
+        taskqueue.add(url='/join-req',
+                      payload=json.dumps({
+                        'user_name': current_user.name,
+                        'supervisor_name': supervisor.name,
+                        'recipient': supervisor.email,
+                        'title': research.title,
+                        'text': request.json.get('text', '')
+                      }),
+                      headers={
+                          'Content-Type': 'application/json'
+                      },
+                      target='emails')
 
         return ok_msg('Request to join was send to {0}'.format(supervisor.email))
+
+class InviteToJoinResearch(Resource):
+
+    def post(self):
+
+
+        return ok_msg('OK')
+
+
+class ReqToJoinResearch(Resource):
+
+    def post(self):
+        send(
+                ReqToJoinSubj(request.json),
+                ReqToJoin(request.json),
+                request.json['recipient']
+        )
+
+        return ok_msg('OK')
+
+
+def send(subj_view, body_view, recipient):
+    renderer = pystache.Renderer()
+
+    subj = renderer.render(subj_view)
+    body = renderer.render(body_view)
+
+    logging.info('Sending email')
+    mail.send_mail(sender=app.config['FROM_EMAIL'],
+                   to=recipient, subject=subj, body=body)

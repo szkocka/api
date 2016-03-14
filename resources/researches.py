@@ -48,10 +48,11 @@ class AddResearch(Resource):
         detailed_desc = description.get('detailed', '')
 
         return Research(
-                supervisor_id=current_user.key(),
+                supervisor_key=current_user.key,
                 title=title,
                 area=area,
                 tags=tags,
+                status='active',
                 brief_desc=brief_desc,
                 detailed_desc=detailed_desc,
                 image_url=image_url)

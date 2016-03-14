@@ -7,6 +7,7 @@ from common.http_responses import created
 from common.security import authenticate
 
 from flask import current_app as app
+from google.appengine.api import app_identity
 
 
 class Upload(Resource):
@@ -14,7 +15,8 @@ class Upload(Resource):
 
     def post(self, current_user):
         uploaded_file = request.files['file']
-        client = storage.Client(project=app.config['PROJECT_ID'])
+        app_id = app_identity.get_application_id()
+        client = storage.Client(project=app_id)
         bucket = client.get_bucket(app.config['BUCKET_NAME'])
 
         blob = bucket.blob('{0}.jpg'.format(str(uuid.uuid1())))

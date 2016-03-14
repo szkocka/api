@@ -7,7 +7,7 @@ from init import add_resources
 app = Flask(__name__)
 
 config = app.config
-config.from_pyfile('app.properties')
+config.from_pyfile('api.properties')
 
 
 CORS(app)

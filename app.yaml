@@ -5,11 +5,8 @@ api_version: 1
 threadsafe: yes
 
 handlers:
+- url: /async/.*
+  script: main.app
+  login: admin
 - url: .*
   script: main.app
-
-libraries:
-- name: MySQLdb
-  version: latest
-- name: pycrypto
-  version: latest

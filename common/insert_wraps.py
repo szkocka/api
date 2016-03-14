@@ -11,7 +11,7 @@ def insert_research(func):
             return bad_request('To use insert_research wrapper research_id must be in url.')
 
         _id = kwargs['research_id']
-        research = Research.get(_id)
+        research = Research.get(int(_id))
 
         if research is None:
             return research_not_found(_id)
@@ -30,7 +30,7 @@ def insert_forum(func):
             return bad_request('To use insert_forum wrapper forum_id must be in url.')
 
         _id = kwargs['forum_id']
-        forum = Forum.get(_id)
+        forum = Forum.get(int(_id))
 
         if forum is None:
             return forum_not_found(_id)
