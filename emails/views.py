@@ -1,10 +1,10 @@
 class InviteToJoin(object):
-    def __init__(self, json):
-        self.supervisor = json['supervisor']
-        self.title = json['title']
-        self.description = json['description']
-        self.researcher = json['researcher']
-        self.text = json['text']
+    def __init__(self, supervisor, title, description, researcher, text):
+        self.supervisor = supervisor
+        self.title = title
+        self.description = description
+        self.researcher = researcher
+        self.text = text
 
     def supervisor(self):
         return self.supervisor
@@ -23,9 +23,9 @@ class InviteToJoin(object):
 
 
 class InviteToJoinSubj(object):
-    def __init__(self, json):
-        self.supervisor = json['supervisor']
-        self.title = json['title']
+    def __init__(self, supervisor, title):
+        self.supervisor = supervisor
+        self.title = title
 
     def supervisor(self):
         return self.supervisor
@@ -35,9 +35,9 @@ class InviteToJoinSubj(object):
 
 
 class ReqToJoinSubj(object):
-    def __init__(self, json):
-        self.user = json['user']
-        self.title = json['title']
+    def __init__(self, user, title):
+        self.user = user
+        self.title = title
 
     def user(self):
         return self.user
@@ -47,11 +47,11 @@ class ReqToJoinSubj(object):
 
 
 class ReqToJoin(object):
-    def __init__(self, json):
-        self.user = json['user']
-        self.title = json['title']
-        self.supervisor = json['supervisor']
-        self.text = json['text']
+    def __init__(self, user, title, supervisor, text):
+        self.user = user
+        self.title = title
+        self.supervisor = supervisor
+        self.text = text
 
     def supervisor(self):
         return self.supervisor

@@ -3,7 +3,7 @@ from flask import request
 from flask.ext.restful import Resource
 from db.model import ResearchInvite, User
 
-from common.http_responses import ok, ok_msg
+from common.http_responses import ok_msg
 
 
 class ProcessResearchers(Resource):

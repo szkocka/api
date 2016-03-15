@@ -33,7 +33,7 @@ class User(ndb.Model):
         return self.key == research.supervisor_key
 
     def is_researcher_of(self, research):
-        return research in set(self.researches)
+        return self.key in set(research.researchers_keys)
 
 
 class Research(ndb.Model):
