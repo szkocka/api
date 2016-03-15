@@ -21,6 +21,7 @@ class InviteToJoin(object):
     def text(self):
         return self.text
 
+
 class InviteToJoinSubj(object):
     def __init__(self, supervisor, title):
         self.supervisor = supervisor
@@ -31,6 +32,7 @@ class InviteToJoinSubj(object):
 
     def title(self):
         return self.title
+
 
 class ReqToJoinSubj(object):
     def __init__(self, user, title):
@@ -43,8 +45,9 @@ class ReqToJoinSubj(object):
     def title(self):
         return self.title
 
+
 class ReqToJoin(object):
-    def __init__(self, supervisor, user, title, text):
+    def __init__(self, user, title, supervisor, text):
         self.user = user
         self.title = title
         self.supervisor = supervisor

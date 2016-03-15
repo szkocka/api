@@ -1,63 +1,69 @@
-from bson import ObjectId
+def prettify_forums(forums):
+    return map(lambda f: prettify_forum(f), forums)
 
-def prettify_forums(users, forums):
-    return map(lambda f: prettify_forum(users, f), forums)
 
-def prettify_forum(users, forum):
+def prettify_messages(messages):
+    return map(lambda m: prettify_message(m), messages)
+
+
+def prettify_researches(researches):
+    return map(lambda r: prettify_research(r), researches)
+
+
+def prettify_forum(forum):
     return {
-        '_id': str(forum['_id']),
-        'createdBy': prettify_user(users, forum['createdBy']),
-        'created': forum['created'].strftime('%Y-%m-%d %H:%M:%S'),
-        'subject': forum['subject'],
-        'research': forum['research']
+        '_id': forum.key.id(),
+        'createdBy': prettify_user(forum.creator_key.get()),
+        'created': forum.creation_time.strftime('%Y-%m-%d %H:%M:%S'),
+        'subject': forum.subject,
+        'research': forum.research_key.id()
     }
 
-def prettify_messages(users, messages):
-    return map(lambda m: prettify_message(users, m), messages)
 
-def prettify_message(users, message):
+def prettify_message(message):
     return {
-        '_id': str(message['_id']),
-        'createdBy': prettify_user(users, message['createdBy']),
-        'created': message['created'].strftime('%Y-%m-%d %H:%M:%S'),
-        'message': message['message']
+        '_id': message.key.id(),
+        'createdBy': prettify_user(message.creator_key.get()),
+        'created': message.creation_time.strftime('%Y-%m-%d %H:%M:%S'),
+        'message': message.text
     }
 
-def prettify_researches(users, researches):
-    return map(lambda r: prettify_research(users, r), researches)
 
-def prettify_research(users, research):
+def prettify_research(research):
     return {
-        'supervisor': prettify_user(users, research['supervisor']),
-        'created': research['created'].strftime('%Y-%m-%d %H:%M:%S'),
-        'title': research['title'],
-        'tags': research['tags'],
-        'area': research['area'],
-        'status': research['status'],
+        '_id': research.key.id(),
+        'supervisor': prettify_user(research.supervisor_key.get()),
+        'created': research.creation_time.strftime('%Y-%m-%d %H:%M:%S'),
+        'title': research.title,
+        'tags': research.tags,
+        'area': research.area,
+        'status': research.status,
         'description': {
-            'brief': research['description']['brief'],
-            'detailed': research['description']['detailed']
+            'brief': research.brief_desc,
+            'detailed': research.detailed_desc
         },
-        'researchers': research['researchers'],
-        'image_url': research['image_url'],
-        '_id': str(research['_id'])
+        'researchers': map(lambda key: prettify_user(key.get()),
+                           research.researchers_keys),
+        'image_url': research.image_url,
     }
 
-def prettify_news(users, news):
-    def prettify_one_news(one_news):
-        return {
-            '_id': str(one_news['_id']),
-            'createdBy': prettify_user(users, one_news['createdBy']),
-            'created': one_news['created'].strftime('%Y-%m-%d %H:%M:%S'),
-            'title': one_news['title'],
-            'body': one_news['body']
-        }
-    return map(prettify_one_news, news)
 
-def prettify_user(users, user_id):
-    user = users.find_one({'_id': ObjectId(user_id)})
+def prettify_news(news):
+    def prettify_one_news(n):
+        return {
+            '_id': n.key.id(),
+            'createdBy': prettify_user(n.creator_key.get()),
+            'created': n.creation_time.strftime('%Y-%m-%d %H:%M:%S'),
+            'title': n.title,
+            'body': n.body
+        }
+
+    return map(lambda n: prettify_one_news(n), news)
+
+
+def prettify_user(user):
     return {
-        'id': user_id,
-        'name': user['name'],
-        'email': user['email']
+        'id': user.key.id(),
+        'name': user.name,
+        'email': user.email
     }
