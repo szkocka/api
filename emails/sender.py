@@ -3,7 +3,7 @@ import logging
 from google.appengine.api import mail
 
 import pystache
-from main import app
+from flask import current_app as app
 
 renderer = pystache.Renderer()
 

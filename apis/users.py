@@ -31,7 +31,7 @@ class CreateUser(Resource):
 
         user_key = user.put()
 
-        taskqueue.add(url='/async/process-researchers',
+        taskqueue.add(url='/tasks/process-researchers',
                       payload=json.dumps({
                           'researcher_id': user_key.id()
                       }),

@@ -18,7 +18,7 @@ class ProcessResearchers(Resource):
             for invite in ResearchInvite.by_email(researcher.email):
                 research = invite.research_key.get()
 
-                research.researchers_keys.append(researcher)
+                research.researchers_keys.append(researcher.key)
                 research.put()
 
                 invite.key.delete()

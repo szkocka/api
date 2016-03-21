@@ -1,6 +1,7 @@
 """`main` is the top level module for your Flask application."""
 from apis.auth import AuthLocalLogin
-from apis.emails import InviteToJoinResearch, ReqToJoinResearch
+from apis.req_to_join import ReqToJoinResearch
+from apis.invite_to_join import InviteToJoinResearch
 from apis.forums import AddMessage, GetForum, ListForums, AddForum
 from apis.me import Me
 from apis.news import AddNews, ListNews
