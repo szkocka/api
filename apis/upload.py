@@ -1,3 +1,4 @@
+import os
 import uuid
 from flask import request
 from flask.ext.restful import Resource
@@ -6,30 +7,34 @@ from gcloud import storage
 from common.http_responses import created
 from common.security import authenticate
 
-from flask import current_app as app
-from google.appengine.api import app_identity
+from google.appengine.api.app_identity import get_application_id
 
 
-class Upload(Resource):
+class UploadImage(Resource):
     method_decorators = [authenticate]
 
+    def __init__(self):
+        client = storage.Client(project=get_application_id())
+        bucket_name = os.environ['IMAGES_BUCKET_NAME']
+        self.bucket = client.get_bucket(bucket_name)
+
     def post(self, current_user):
-        uploaded_file = request.files['file']
-        app_id = app_identity.get_application_id()
-        client = storage.Client(project=app_id)
-        bucket = client.get_bucket(app.config['BUCKET_NAME'])
-
-        blob = bucket.blob('{0}.jpg'.format(str(uuid.uuid1())))
-        blob.upload_from_file(uploaded_file,
-                              content_type=uploaded_file.content_type,
-                              size=uploaded_file.__sizeof__())
-        blob.make_public()
-
-        https_url = blob.public_url
-        http_url = https_url.replace('https://', 'http://')
+        image = request.files['file']
+        blob_url = self.__store_image(image)
 
         return created(
-            {
-                'url': http_url
-            }
+                {
+                    'url': blob_url.replace('https://', 'http://')
+                }
         )
+
+    def __store_image(self, image):
+        blob_name = '{0}.jpg'.format(str(uuid.uuid1()))
+        blob = self.bucket.blob(blob_name)
+
+        blob.upload_from_file(image,
+                              content_type=image.content_type,
+                              size=image.__sizeof__())
+        blob.make_public()
+
+        return blob.public_url

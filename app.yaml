@@ -10,3 +10,8 @@ handlers:
   login: admin
 - url: .*
   script: main.app
+
+env_variables:
+    IMAGES_BUCKET_NAME: 'szkocka-1080-images'
+    TOKEN_SEED: 'SEED_FOR_YOU_TOKEN_GENERATOR'
+    SENDER_EMAIL: 'admin@szkocka-1080.appspotmail.com'

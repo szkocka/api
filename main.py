@@ -8,18 +8,13 @@ from apis.news import AddNews, ListNews
 from apis.researches import AddResearch, UpdateResearch, GetResearch
 from apis.researches import ListResearches
 from apis.tasks.tasks import ProcessResearchers
-from apis.upload import Upload
+from apis.upload import UploadImage
 from apis.users import CreateUser
 from flask import Flask
 from flask.ext.cors import CORS
 from flask.ext.restful import Api
 
 app = Flask(__name__)
-
-config = app.config
-config.from_pyfile('app.properties')
-
-
 CORS(app)
 api = Api(app)
 # Note: We don't need to call run() since our application is embedded within
@@ -41,6 +36,6 @@ api.add_resource(ReqToJoinResearch, '/researches/<research_id>/join')
 api.add_resource(CreateUser, '/users')
 api.add_resource(AuthLocalLogin, '/auth/local')
 api.add_resource(Me, '/users/me')
-api.add_resource(Upload, '/upload')
+api.add_resource(UploadImage, '/upload')
 
 api.add_resource(ProcessResearchers, '/tasks/process-researchers')

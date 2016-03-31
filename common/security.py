@@ -13,7 +13,7 @@ TOKEN_UTIL = TokenUtil()
 
 class Token:
     def __init__(self, user_id):
-        self.token = TOKEN_UTIL.generate(user_id, app.config['SECRET_KEY'])
+        self.token = TOKEN_UTIL.generate(user_id)
 
     def json(self):
         return {'token': self.token}
@@ -29,7 +29,7 @@ def authenticate(func):
         authorization = request.headers['Authorization']
         token = authorization.replace('Bearer ', '')
         try:
-            user_id = TOKEN_UTIL.verify(token, app.config['SECRET_KEY'])
+            user_id = TOKEN_UTIL.verify(token)
         except SignatureExpired:
             return unauthorized('Token expired.')
         except BadSignature:
