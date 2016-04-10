@@ -6,7 +6,7 @@ from common.insert_wraps import insert_research
 from common.validation import validate_request
 from common.prettify_responses import prettify_researches, prettify_research
 from common.security import authenticate, is_supervisor
-from db.model import Research
+from model.db import Research
 
 
 class ListResearches(Resource):

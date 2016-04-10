@@ -5,7 +5,7 @@ from common.http_responses import ok_msg
 from common.insert_wraps import insert_research
 from common.security import is_supervisor, authenticate
 from common.validation import validate_request
-from db.model import User, ResearchInvite
+from model.db import User, ResearchInvite
 from emails import sender
 from emails.views import InviteToJoinSubj, InviteToJoin
 

@@ -6,6 +6,9 @@ class User(ndb.Model):
     email = ndb.StringProperty()
     is_admin = ndb.BooleanProperty()
     hashed_password = ndb.StringProperty()
+    cv = ndb.TextProperty()
+    creation_time = ndb.DateTimeProperty(auto_now_add=True)
+    last_update_time = ndb.DateTimeProperty(auto_now=True)
 
     @classmethod
     def get(cls, _id):
@@ -42,6 +45,7 @@ class Research(ndb.Model):
     area = ndb.StringProperty()
     status = ndb.StringProperty()
     creation_time = ndb.DateTimeProperty(auto_now_add=True)
+    last_update_time = ndb.DateTimeProperty(auto_now=True)
     brief_desc = ndb.TextProperty()
     detailed_desc = ndb.TextProperty()
     tags = ndb.StringProperty(repeated=True)
@@ -56,10 +60,19 @@ class Research(ndb.Model):
     def all(cls):
         return cls.query().fetch()
 
+    @classmethod
+    def by_supervisor(cls, user_key):
+        return cls.query(cls.supervisor_key == user_key).fetch()
+
+    @classmethod
+    def by_researcher(cls, user_key):
+        return cls.query(cls.researchers_keys == user_key).fetch()
+
 
 class ResearchInvite(ndb.Model):
     research_key = ndb.KeyProperty(kind=Research)
     email = ndb.StringProperty()
+    creation_time = ndb.DateTimeProperty(auto_now_add=True)
 
     @classmethod
     def by_email(cls, email):
@@ -71,6 +84,7 @@ class Forum(ndb.Model):
     research_key = ndb.KeyProperty(kind=Research)
     subject = ndb.TextProperty()
     creation_time = ndb.DateTimeProperty(auto_now_add=True)
+    last_update_time = ndb.DateTimeProperty(auto_now=True)
 
     @classmethod
     def get(cls, _id):
@@ -86,6 +100,7 @@ class Message(ndb.Model):
     forum_key = ndb.KeyProperty(kind=Forum)
     text = ndb.TextProperty()
     creation_time = ndb.DateTimeProperty(auto_now_add=True)
+    last_update_time = ndb.DateTimeProperty(auto_now=True)
 
     @classmethod
     def by_forum(cls, forum_key):
@@ -97,7 +112,14 @@ class News(ndb.Model):
     title = ndb.TextProperty()
     body = ndb.TextProperty()
     creation_time = ndb.DateTimeProperty(auto_now_add=True)
+    last_update_time = ndb.DateTimeProperty(auto_now=True)
 
     @classmethod
     def all(cls):
         return cls.query().order(-cls.creation_time)
+
+
+class AboutPage(ndb.Model):
+    text = ndb.TextProperty()
+    creation_time = ndb.DateTimeProperty(auto_now_add=True)
+    last_update_time = ndb.DateTimeProperty(auto_now=True)

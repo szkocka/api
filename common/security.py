@@ -1,12 +1,11 @@
 from functools import wraps
 
 from flask import request
-from flask import current_app as app
 from itsdangerous import SignatureExpired, BadSignature
 
 from common.http_responses import forbidden, unauthorized, bad_request
 from common.util import TokenUtil
-from db.model import User
+from model.db import User
 
 TOKEN_UTIL = TokenUtil()
 

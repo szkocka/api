@@ -5,7 +5,7 @@ from common.http_responses import ok, created
 from common.validation import validate_request
 from common.prettify_responses import prettify_news
 from common.security import authenticate
-from db.model import News
+from model.db import News
 
 
 class ListNews(Resource):

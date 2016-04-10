@@ -1,7 +1,7 @@
 from flask import request
 
 from flask.ext.restful import Resource
-from db.model import ResearchInvite, User
+from model.db import ResearchInvite, User
 
 from common.http_responses import ok_msg
 

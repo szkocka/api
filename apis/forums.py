@@ -6,7 +6,7 @@ from common.insert_wraps import insert_forum, insert_research
 from common.prettify_responses import prettify_forums, prettify_forum, prettify_messages
 from common.validation import validate_request
 from common.security import authenticate, is_researcher
-from db.model import Forum, Message
+from model.db import Forum, Message
 
 
 class ListForums(Resource):

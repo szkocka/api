@@ -5,7 +5,7 @@ from common.http_responses import unauthorized, ok
 from common.util import hash_password
 from common.validation import validate_request
 from common.security import Token
-from db.model import User
+from model.db import User
 
 
 class AuthLocalLogin(Resource):
