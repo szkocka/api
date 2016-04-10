@@ -1,7 +1,7 @@
 from functools import wraps
 
-from common.http_responses import bad_request, forum_not_found, research_not_found
-from db.model import Forum, Research
+from common.http_responses import bad_request, forum_not_found, research_not_found, user_not_found
+from model.db import Forum, Research, User
 
 
 def insert_research(func):
@@ -37,6 +37,25 @@ def insert_forum(func):
 
         del kwargs['forum_id']
         kwargs['forum'] = forum
+
+        return func(*args, **kwargs)
+    return wrapper
+
+
+def insert_user(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if 'user_id' not in kwargs:
+            return bad_request('To use insert_user wrapper user_id must be in url.')
+
+        _id = kwargs['user_id']
+        user = User.get(int(_id))
+
+        if user is None:
+            return user_not_found(_id)
+
+        del kwargs['user_id']
+        kwargs['user'] = user
 
         return func(*args, **kwargs)
     return wrapper
