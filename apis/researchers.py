@@ -1,8 +1,7 @@
-from flask import request
 from flask.ext.restful import Resource
-
+from flask import request
 from common.http_responses import ok_msg
-from common.insert_wraps import insert_research
+from common.insert_wraps import insert_research, insert_user
 from common.security import is_supervisor, authenticate
 from common.validation import validate_request
 from model.db import User, ResearchInvite
@@ -10,7 +9,17 @@ from emails import sender
 from emails.views import InviteToJoinSubj, InviteToJoin
 
 
-class InviteToJoinResearch(Resource):
+class RemoveResearcher(Resource):
+    method_decorators = [is_supervisor, insert_research, insert_user, authenticate]
+
+    def delete(self, current_user, research, user):
+        research.researchers_keys.remove(user.key)
+        research.put()
+
+        return ok_msg('Researcher removed from research.')
+
+
+class AddResearcher(Resource):
     method_decorators = [is_supervisor, insert_research, validate_request, authenticate]
     required_fields = ['email']  # used by validate_request
 
@@ -38,10 +47,11 @@ class InviteToJoinResearch(Resource):
     def __add_researcher(self, research, user):
         research.researchers_keys.append(user.key)
         research.put()
+
         return user.name
 
     def __add_invite(self, research, recipient):
-        invite = ResearchInvite(research_key=research.key,
-                                email=recipient)
+        invite = ResearchInvite(research_key=research.key, email=recipient)
         invite.put()
+
         return recipient

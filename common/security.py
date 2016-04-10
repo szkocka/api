@@ -1,3 +1,4 @@
+import logging
 from functools import wraps
 
 from flask import request
@@ -88,6 +89,7 @@ def is_admin(func):
     def wrapper(*args, **kwargs):
         current_user = kwargs['current_user']
 
+        logging.info('Current user: {0}'.format(current_user))
         if not current_user.is_admin:
             return forbidden('You must be admin to call this API.')
 

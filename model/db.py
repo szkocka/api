@@ -120,6 +120,10 @@ class News(ndb.Model):
 
 
 class AboutPage(ndb.Model):
-    text = ndb.TextProperty()
+    content = ndb.TextProperty()
     creation_time = ndb.DateTimeProperty(auto_now_add=True)
     last_update_time = ndb.DateTimeProperty(auto_now=True)
+
+    @classmethod
+    def get(cls, _id):
+        return cls.get_by_id(_id)
