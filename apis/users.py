@@ -3,7 +3,7 @@ import json
 from flask import request
 from flask.ext.restful import Resource
 
-from common.http_responses import bad_request, created, ok, unauthorized, ok_msg
+from common.http_responses import bad_request, created, ok, ok_msg
 from common.insert_wraps import insert_user
 from common.util import hash_password
 from common.validation import validate_request
@@ -51,12 +51,6 @@ class UpdateUser(Resource):
     method_decorators = [authenticate]
 
     def put(self, current_user):
-        #user_id = user.key.id()
-        #current_user_id = current_user.key.id()
-
-        #if user_id != current_user_id:
-            #return unauthorized('You can only edit your own profile.')
-
         json_request = request.json
         current_user.name = json_request.get('name', current_user.name)
         current_user.cv = json_request.get('cv', current_user.cv)
