@@ -10,7 +10,7 @@ from apis.researches import AddResearch, UpdateResearch, GetResearch
 from apis.researches import ListResearches
 from apis.tasks.tasks import ProcessResearchers
 from apis.upload import UploadImage
-from apis.users import CreateUser, UserDetails
+from apis.users import CreateUser, UserDetails, UpdateUser
 from flask import Flask
 from flask.ext.cors import CORS
 from flask.ext.restful import Api
@@ -37,9 +37,10 @@ api.add_resource(AddResearcher, '/researches/<research_id>/invite')
 api.add_resource(RemoveResearcher, '/researches/<research_id>/researchers/<user_id>')
 api.add_resource(ReqToJoinResearch, '/researches/<research_id>/join')
 api.add_resource(CreateUser, '/users')
-api.add_resource(AuthLocalLogin, '/auth/local')
-api.add_resource(Me, '/users/me')
+api.add_resource(UpdateUser, '/users')
 api.add_resource(UserDetails, '/users/<user_id>')
+api.add_resource(Me, '/users/me')
+api.add_resource(AuthLocalLogin, '/auth/local')
 api.add_resource(UploadImage, '/upload')
 
 api.add_resource(UpdateAboutPage, '/pages/about')
