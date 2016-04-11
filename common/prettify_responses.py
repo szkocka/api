@@ -48,19 +48,6 @@ def prettify_research(research):
     }
 
 
-def prettify_news(news):
-    def prettify_one_news(n):
-        return {
-            '_id': n.key.id(),
-            'createdBy': prettify_user(n.creator_key.get()),
-            'created': n.creation_time.strftime('%Y-%m-%d %H:%M:%S'),
-            'title': n.title,
-            'body': n.body
-        }
-
-    return map(lambda n: prettify_one_news(n), news)
-
-
 def prettify_user(user):
     return {
         'id': user.key.id(),

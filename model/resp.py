@@ -8,7 +8,14 @@ class UserJson(BaseJsonResponce):
         self.id = user.key.id()
         self.name = user.name
         self.email = user.email
+
+
+class UserDetailsJson(UserJson):
+    def __init__(self, user, supervisor_of, researcher_in):
+        UserJson.__init__(self, user)
         self.cv = user.cv
+        self.supervisor_of = map(lambda r: ResearchJson(r).to_json(), supervisor_of)
+        self.researcher_in = map(lambda r: ResearchJson(r).to_json(), researcher_in)
 
 
 class ResearchJson(BaseJsonResponce):
@@ -26,8 +33,18 @@ class ResearchJson(BaseJsonResponce):
         self.image_url = research.image_url
 
 
-class UserDetailsJson(UserJson):
-    def __init__(self, user, supervisor_of, researcher_in):
-        UserJson.__init__(self, user)
-        self.supervisor_of = map(lambda r: ResearchJson(r).to_json(), supervisor_of)
-        self.researcher_in = map(lambda r: ResearchJson(r).to_json(), researcher_in)
+class NewsJson(BaseJsonResponce):
+    def __init__(self, n):
+        self._id = n.key.id()
+        self.createdBy = UserJson(n.creator_key.get()).to_json(),
+        self.created = n.creation_time.strftime('%Y-%m-%d %H:%M:%S'),
+        self.title = n.title,
+        self.body = n.body
+        self.image_url = n.image_url
+
+
+class NewsListJson(BaseJsonResponce):
+    def __init__(self, news):
+        self.news = map(lambda n: NewsJson(n).to_json(), news)
+
+

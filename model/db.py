@@ -111,6 +111,7 @@ class News(ndb.Model):
     creator_key = ndb.KeyProperty(kind=User)
     title = ndb.TextProperty()
     body = ndb.TextProperty()
+    image_url = ndb.TextProperty()
     creation_time = ndb.DateTimeProperty(auto_now_add=True)
     last_update_time = ndb.DateTimeProperty(auto_now=True)
 
