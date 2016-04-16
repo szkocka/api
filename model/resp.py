@@ -48,3 +48,11 @@ class NewsListJson(BaseJsonResponce):
         self.news = map(lambda n: NewsJson(n).to_json(), news)
 
 
+class ResearchIdJson(BaseJsonResponce):
+    def __init__(self, research_key):
+        self.research_id = research_key.id()
+
+
+class TagsJson(BaseJsonResponce):
+    def __init__(self, tags):
+        self.tags = tags

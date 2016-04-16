@@ -1,8 +1,8 @@
-import logging
 import os
-
+import json
 from flask import request
 from flask.ext.restful import Resource
+from google.appengine.api import taskqueue
 
 from common.http_responses import ok, created
 from common.insert_wraps import insert_research
@@ -10,6 +10,7 @@ from common.validation import validate_request
 from common.prettify_responses import prettify_researches, prettify_research
 from common.security import authenticate, is_supervisor
 from model.db import Research
+from model.resp import TagsJson, ResearchIdJson
 
 
 class ListResearches(Resource):
@@ -34,12 +35,10 @@ class AddResearch(Resource):
 
     def post(self, current_user):
         research = self.__create(current_user, request.json)
+        research_key = research.put()
+        add_task(research_key)
 
-        return created(
-            {
-                'research_id': research.put().id()
-            }
-        )
+        return created(ResearchIdJson(research_key).to_json())
 
     def __create(self, current_user, json):
         description = json['description']
@@ -82,13 +81,20 @@ class UpdateResearch(Resource):
         research.brief_desc = description.get('brief', research.brief_desc)
         research.detailed_desc = description.get('detailed', research.detailed_desc)
 
-        return ok(
-            {
-                'research_id': research.put().id()
-            }
-        )
+        research_key = research.put()
+        add_task(research_key)
+
+        return ok(ResearchIdJson(research_key).to_json())
 
 
 class ListTags(Resource):
     def get(self):
-        return ok({'tags': Research.all_tags()})
+        tags = Research.all_tags()
+        return ok(TagsJson(tags).to_json())
+
+
+def add_task(research_key):
+    payload = ResearchIdJson(research_key).to_json()
+    taskqueue.add(url='/tasks/index-research',
+                  payload=json.dumps(payload),
+                  headers={'Content-Type': 'application/json'})

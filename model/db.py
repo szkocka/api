@@ -37,12 +37,12 @@ class User(ndb.Model):
 
     @classmethod
     def all(cls, cursor):
-        page = 3
+        page_size = 3
 
         if cursor:
             cursor_obj = Cursor.from_websafe_string(cursor)
-            return cls.query().fetch_page(page, start_cursor=cursor_obj)
-        return cls.query().fetch_page(page)
+            return cls.query().fetch_page(page_size, start_cursor=cursor_obj)
+        return cls.query().fetch_page(page_size)
 
     def is_supervisor_of(self, research):
         return self.key == research.supervisor_key

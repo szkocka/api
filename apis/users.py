@@ -35,15 +35,7 @@ class CreateUser(Resource):
                     hashed_password=hash_password(password))
 
         user_key = user.put()
-
-        taskqueue.add(url='/tasks/process-researchers',
-                      payload=json.dumps({
-                          'researcher_id': user_key.id()
-                      }),
-                      headers={
-                          'Content-Type': 'application/json'
-                      }
-        )
+        add_task(user_key)
 
         return created(Token(user_key.id()).json())
 
@@ -84,3 +76,10 @@ class UserDetails(Resource):
         researcher_in = Research.by_researcher(user.key)
 
         return ok(UserDetailsJson(user, supervisor_of, researcher_in))
+
+
+def add_task(user_key):
+    payload = {'researcher_id': user_key.id()}
+    taskqueue.add(url='/tasks/process-researchers',
+                  payload=json.dumps(payload),
+                  headers={'Content-Type': 'application/json'})
