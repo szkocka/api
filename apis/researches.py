@@ -1,3 +1,6 @@
+import logging
+import os
+
 from flask import request
 from flask.ext.restful import Resource
 
@@ -42,7 +45,10 @@ class AddResearch(Resource):
         description = json['description']
         title = json['title']
         area = json['area']
-        image_url = json.get('image_url', None)
+
+        default_image_url = os.environ['DEFAULT_IMAGE']
+        image_url = json.get('image_url', default_image_url)
+
         tags = json.get('tags', [])
         brief_desc = description.get('brief', '')
         detailed_desc = description.get('detailed', '')
@@ -81,3 +87,8 @@ class UpdateResearch(Resource):
                 'research_id': research.put().id()
             }
         )
+
+
+class ListTags(Resource):
+    def get(self):
+        return ok({'tags': Research.all_tags()})

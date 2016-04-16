@@ -1,3 +1,6 @@
+import logging
+
+from google.appengine.datastore.datastore_query import Cursor
 from google.appengine.ext import ndb
 
 
@@ -32,6 +35,15 @@ class User(ndb.Model):
         else:
             return None
 
+    @classmethod
+    def all(cls, cursor):
+        page = 3
+
+        if cursor:
+            cursor_obj = Cursor.from_websafe_string(cursor)
+            return cls.query().fetch_page(page, start_cursor=cursor_obj)
+        return cls.query().fetch_page(page)
+
     def is_supervisor_of(self, research):
         return self.key == research.supervisor_key
 
@@ -59,6 +71,15 @@ class Research(ndb.Model):
     @classmethod
     def all(cls):
         return cls.query().fetch()
+
+    @classmethod
+    def all_tags(cls):
+        researches = cls.query().fetch(projection=['tags'])
+        tags = set({})
+        for r in researches:
+            tags.update(r.tags)
+
+        return list(tags)
 
     @classmethod
     def by_supervisor(cls, user_key):

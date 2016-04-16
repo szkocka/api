@@ -6,11 +6,11 @@ from apis.forums import AddMessage, GetForum, ListForums, AddForum
 from apis.me import Me
 from apis.news import AddNews, ListNews
 from apis.researchers import AddResearcher, RemoveResearcher
-from apis.researches import AddResearch, UpdateResearch, GetResearch
+from apis.researches import AddResearch, UpdateResearch, GetResearch, ListTags
 from apis.researches import ListResearches
 from apis.tasks.tasks import ProcessResearchers
 from apis.upload import UploadImage
-from apis.users import CreateUser, UserDetails, UpdateUser
+from apis.users import CreateUser, UserDetails, UpdateUser, ListUsers
 from flask import Flask
 from flask.ext.cors import CORS
 from flask.ext.restful import Api
@@ -28,16 +28,17 @@ api.add_resource(AddResearch, '/researches')
 api.add_resource(ListResearches, '/researches')
 api.add_resource(GetResearch, '/researches/<research_id>')
 api.add_resource(UpdateResearch, '/researches/<research_id>')
+api.add_resource(ListTags, '/researches/tags')
 api.add_resource(GetForum, '/researches/forums/<forum_id>')
 api.add_resource(AddMessage, '/researches/forums/<forum_id>')
 api.add_resource(ListForums, '/researches/<research_id>/forums')
 api.add_resource(AddForum, '/researches/<research_id>/forums')
-api.add_resource(AddResearcher, '/researches/<research_id>/invite')
-#api.add_resource(AddResearcher, '/researches/<research_id>/researchers')
+api.add_resource(AddResearcher, '/researches/<research_id>/researchers')
 api.add_resource(RemoveResearcher, '/researches/<research_id>/researchers/<user_id>')
 api.add_resource(ReqToJoinResearch, '/researches/<research_id>/join')
 api.add_resource(CreateUser, '/users')
 api.add_resource(UpdateUser, '/users')
+api.add_resource(ListUsers, '/users')
 api.add_resource(UserDetails, '/users/<user_id>')
 api.add_resource(Me, '/users/me')
 api.add_resource(AuthLocalLogin, '/auth/local')

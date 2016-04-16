@@ -15,7 +15,7 @@ class UploadImage(Resource):
 
     def __init__(self):
         client = storage.Client(project=get_application_id())
-        bucket_name = os.environ['IMAGES_BUCKET_NAME']
+        bucket_name = os.environ['IMAGES_BUCKET']
         self.bucket = client.get_bucket(bucket_name)
 
     def post(self, current_user):

@@ -1,4 +1,5 @@
 import json
+import logging
 
 from flask import request
 from flask.ext.restful import Resource
@@ -11,7 +12,7 @@ from common.security import Token, authenticate
 from model.db import User, Research
 from google.appengine.api import taskqueue
 
-from model.resp import UserDetailsJson
+from model.resp import UserDetailsJson, UserJson
 
 
 class CreateUser(Resource):
@@ -58,6 +59,21 @@ class UpdateUser(Resource):
         current_user.put()
 
         return ok_msg('Profile updated.')
+
+
+class ListUsers(Resource):
+    def get(self):
+        cursor = request.args.get('cursor')
+        logging.info(cursor)
+
+        result, cursor, _ = User.all(cursor)
+
+        return ok(
+                {
+                    'users': map(lambda u: UserJson(u).to_json(), result),
+                    'cursor': cursor.urlsafe()
+                }
+        )
 
 
 class UserDetails(Resource):

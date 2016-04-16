@@ -12,6 +12,7 @@ handlers:
   script: main.app
 
 env_variables:
-    IMAGES_BUCKET_NAME: 'szkocka-1080-images'
-    TOKEN_SEED: 'SEED_FOR_YOU_TOKEN_GENERATOR'
+    IMAGES_BUCKET: 'szkocka-1080-images'
+    DEFAULT_IMAGE: 'http://storage.googleapis.com/szkocka-1080-images/default.gif'
+    TOKEN_SEED: 'aqswdefrgthyujikolzsxxdcfvgbhnjmk'
     SENDER_EMAIL: 'admin@szkocka-1080.appspotmail.com'

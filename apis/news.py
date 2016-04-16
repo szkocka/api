@@ -1,3 +1,5 @@
+import os
+
 from flask import request
 from flask.ext.restful import Resource
 
@@ -15,12 +17,14 @@ class ListNews(Resource):
 
 class AddNews(Resource):
     method_decorators = [is_admin, validate_request, authenticate]
-    required_fields = ['title', 'body', 'image_url']  # used by validate_request
+    required_fields = ['title', 'body']  # used by validate_request
 
     def post(self, current_user):
         title = request.json['title']
         body = request.json['body']
-        image_url = request.json.get('image_url', '')
+
+        default_image_url = os.environ['DEFAULT_IMAGE']
+        image_url = request.json.get('image_url', default_image_url)
 
         news = News(creator_key=current_user.key,
                     title=title,
