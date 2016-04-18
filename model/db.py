@@ -1,4 +1,5 @@
 import logging
+import os
 
 from google.appengine.datastore.datastore_query import Cursor
 from google.appengine.ext import ndb
@@ -37,7 +38,7 @@ class User(ndb.Model):
 
     @classmethod
     def all(cls, cursor):
-        page_size = 3
+        page_size = int(os.environ['PAGE_SIZE'])
 
         if cursor:
             cursor_obj = Cursor.from_websafe_string(cursor)
@@ -69,8 +70,14 @@ class Research(ndb.Model):
         return cls.get_by_id(_id)
 
     @classmethod
-    def all(cls):
-        return cls.query().fetch()
+    def all(cls, cursor):
+        page_size = int(os.environ['PAGE_SIZE'])
+        query = cls.query()
+
+        if cursor:
+            cursor_obj = Cursor.from_websafe_string(cursor)
+            return query.fetch_page(page_size, start_cursor=cursor_obj)
+        return query.fetch_page(page_size)
 
     @classmethod
     def all_tags(cls):
@@ -112,8 +119,14 @@ class Forum(ndb.Model):
         return cls.get_by_id(_id)
 
     @classmethod
-    def by_research(cls, research_key):
-        return cls.query(cls.research_key == research_key).fetch()
+    def by_research(cls, research_key, cursor):
+        page_size = int(os.environ['PAGE_SIZE'])
+        query = cls.query(cls.research_key == research_key)
+
+        if cursor:
+            cursor_obj = Cursor.from_websafe_string(cursor)
+            return query.fetch_page(page_size, start_cursor=cursor_obj)
+        return query.fetch_page(page_size)
 
 
 class Message(ndb.Model):
@@ -124,8 +137,14 @@ class Message(ndb.Model):
     last_update_time = ndb.DateTimeProperty(auto_now=True)
 
     @classmethod
-    def by_forum(cls, forum_key):
-        return cls.query(cls.forum_key == forum_key).fetch()
+    def by_forum(cls, forum_key, cursor):
+        page_size = int(os.environ['PAGE_SIZE'])
+        query = cls.query(cls.forum_key == forum_key)
+
+        if cursor:
+            cursor_obj = Cursor.from_websafe_string(cursor)
+            return query.fetch_page(page_size, start_cursor=cursor_obj)
+        return query.fetch_page(page_size)
 
 
 class News(ndb.Model):
@@ -137,8 +156,14 @@ class News(ndb.Model):
     last_update_time = ndb.DateTimeProperty(auto_now=True)
 
     @classmethod
-    def all(cls):
-        return cls.query().order(-cls.creation_time)
+    def all(cls, cursor):
+        page_size = int(os.environ['PAGE_SIZE'])
+        query = cls.query().order(-cls.creation_time)
+
+        if cursor:
+            cursor_obj = Cursor.from_websafe_string(cursor)
+            return query.fetch_page(page_size, start_cursor=cursor_obj)
+        return query.fetch_page(page_size)
 
 
 class AboutPage(ndb.Model):

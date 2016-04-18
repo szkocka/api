@@ -1,5 +1,9 @@
+import logging
+
+
 class BaseJsonResponce:
-    def to_json(self):
+    def js(self):
+        logging.info(self.__dict__)
         return self.__dict__
 
 
@@ -14,13 +18,13 @@ class UserDetailsJson(UserJson):
     def __init__(self, user, supervisor_of, researcher_in):
         UserJson.__init__(self, user)
         self.cv = user.cv
-        self.supervisor_of = map(lambda r: ResearchJson(r).to_json(), supervisor_of)
-        self.researcher_in = map(lambda r: ResearchJson(r).to_json(), researcher_in)
+        self.supervisor_of = map(lambda r: ResearchJson(r).js(), supervisor_of)
+        self.researcher_in = map(lambda r: ResearchJson(r).js(), researcher_in)
 
 
 class ResearchJson(BaseJsonResponce):
     def __init__(self, research):
-        self._id = research.key.id()
+        self.id = research.key.id()
         self.created = research.creation_time.strftime('%Y-%m-%d %H:%M:%S')
         self.title = research.title
         self.tags = research.tags
@@ -33,19 +37,41 @@ class ResearchJson(BaseJsonResponce):
         self.image_url = research.image_url
 
 
+class ResearchDetailsJson(ResearchJson):
+    def __init__(self, research):
+        ResearchJson.__init__(self, research)
+        self.supervisor = UserJson(research.supervisor_key.get()).js()
+        self.researchers = map(lambda key: UserJson(key.get()).js(),
+                               research.researchers_keys)
+
+
+class ForumJson(BaseJsonResponce):
+    def __init__(self, forum):
+        self.id = forum.key.id()
+        self.createdBy = UserJson(forum.creator_key.get()).js()
+        self.created = forum.creation_time.strftime('%Y-%m-%d %H:%M:%S')
+        self.subject = forum.subject
+        self.research = forum.research_key.id()
+
+
 class NewsJson(BaseJsonResponce):
     def __init__(self, n):
         self._id = n.key.id()
-        self.createdBy = UserJson(n.creator_key.get()).to_json(),
-        self.created = n.creation_time.strftime('%Y-%m-%d %H:%M:%S'),
-        self.title = n.title,
+        self.createdBy = UserJson(n.creator_key.get()).js()
+        self.created = n.creation_time.strftime('%Y-%m-%d %H:%M:%S')
+        self.title = n.title
+        logging.info(n.title)
+        logging.info(self.title)
         self.body = n.body
         self.image_url = n.image_url
 
 
-class NewsListJson(BaseJsonResponce):
-    def __init__(self, news):
-        self.news = map(lambda n: NewsJson(n).to_json(), news)
+class MessageJson(BaseJsonResponce):
+    def __init__(self, message):
+        self.id = message.key.id(),
+        self.createdBy = UserJson(message.creator_key.get()).js(),
+        self.created = message.creation_time.strftime('%Y-%m-%d %H:%M:%S'),
+        self.message = message.text
 
 
 class ResearchIdJson(BaseJsonResponce):
@@ -53,6 +79,62 @@ class ResearchIdJson(BaseJsonResponce):
         self.research_id = research_key.id()
 
 
+class NewsIdJson(BaseJsonResponce):
+    def __init__(self, news_key):
+        self.news_id = news_key.id()
+
+
+class ForumIdJson(BaseJsonResponce):
+    def __init__(self, forum_key):
+        self.forum_id = forum_key.id()
+
+
+class MessageIdJson(BaseJsonResponce):
+    def __init__(self, message_key):
+        self.message_id = message_key.id()
+
+
 class TagsJson(BaseJsonResponce):
     def __init__(self, tags):
         self.tags = tags
+
+
+class ListNewsJson(BaseJsonResponce):
+    def __init__(self, news, cursor):
+        self.news = map(lambda n: NewsJson(n).js(), news)
+
+        self.cursor = None
+        if cursor:
+            self.cursor = cursor.urlsafe()
+
+
+class ListResearchesJson(BaseJsonResponce):
+    def __init__(self, researches, cursor):
+        self.researches = map(lambda r: ResearchDetailsJson(r).js(), researches)
+
+        self.cursor = None
+        if cursor:
+            self.cursor = cursor.urlsafe()
+
+
+class ListForumsJson(BaseJsonResponce):
+    def __init__(self, forums, cursor):
+        self.forums = map(lambda f: ForumJson(f).js(), forums)
+
+        self.cursor = None
+        if cursor:
+            self.cursor = cursor.urlsafe()
+
+
+class ListMessagesJson(BaseJsonResponce):
+    def __init__(self, messages, cursor):
+        self.messages = map(lambda m: MessageJson(m).js(), messages)
+
+        self.cursor = None
+        if cursor:
+            self.cursor = cursor.urlsafe()
+
+
+class ResearchesSearchResultJson(BaseJsonResponce):
+    def __init__(self, researches):
+        self.researches = map(lambda r: ResearchDetailsJson(r).js(), researches)

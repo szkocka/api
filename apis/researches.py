@@ -7,26 +7,24 @@ from google.appengine.api import taskqueue
 from common.http_responses import ok, created
 from common.insert_wraps import insert_research
 from common.validation import validate_request
-from common.prettify_responses import prettify_researches, prettify_research
 from common.security import authenticate, is_supervisor
 from model.db import Research
-from model.resp import TagsJson, ResearchIdJson
+from model.resp import TagsJson, ResearchIdJson, ListResearchesJson, ResearchDetailsJson
 
 
 class ListResearches(Resource):
     def get(self):
-        return ok(
-            {
-                'researches': prettify_researches(Research.all())
-            }
-        )
+        cursor = request.args.get('cursor')
+        researches, cursor, _ = Research.all(cursor)
+
+        return ok(ListResearchesJson(researches, cursor))
 
 
 class GetResearch(Resource):
     method_decorators = [insert_research]
 
     def get(self, research):
-        return ok(prettify_research(research))
+        return ok(ResearchDetailsJson(research))
 
 
 class AddResearch(Resource):
@@ -38,7 +36,7 @@ class AddResearch(Resource):
         research_key = research.put()
         add_task(research_key)
 
-        return created(ResearchIdJson(research_key).to_json())
+        return created(ResearchIdJson(research_key))
 
     def __create(self, current_user, json):
         description = json['description']
@@ -84,17 +82,17 @@ class UpdateResearch(Resource):
         research_key = research.put()
         add_task(research_key)
 
-        return ok(ResearchIdJson(research_key).to_json())
+        return ok(ResearchIdJson(research_key).js())
 
 
 class ListTags(Resource):
     def get(self):
         tags = Research.all_tags()
-        return ok(TagsJson(tags).to_json())
+        return ok(TagsJson(tags))
 
 
 def add_task(research_key):
-    payload = ResearchIdJson(research_key).to_json()
+    payload = ResearchIdJson(research_key).js()
     taskqueue.add(url='/tasks/index-research',
                   payload=json.dumps(payload),
                   headers={'Content-Type': 'application/json'})

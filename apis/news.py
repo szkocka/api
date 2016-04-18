@@ -7,12 +7,15 @@ from common.http_responses import ok, created
 from common.security import authenticate, is_admin
 from common.validation import validate_request
 from model.db import News
-from model.resp import NewsListJson
+from model.resp import ListNewsJson, NewsIdJson
 
 
 class ListNews(Resource):
     def get(self):
-        return ok(NewsListJson(News.all()).to_json())
+        cursor = request.args.get('cursor')
+        result, cursor, _ = News.all(cursor)
+
+        return ok(ListNewsJson(result, cursor))
 
 
 class AddNews(Resource):
@@ -31,8 +34,6 @@ class AddNews(Resource):
                     body=body,
                     image_url=image_url)
 
-        return created(
-            {
-                'news_id': news.put().id()
-            }
-        )
+        news_key = news.put()
+
+        return created(NewsIdJson(news_key))

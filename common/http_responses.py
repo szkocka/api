@@ -7,11 +7,13 @@ def ok_msg(msg):
 
 def ok(obj):
     if isinstance(obj, BaseJsonResponce):
-        return obj.to_json()
+        return obj.js(), 200
     return obj, 200
 
 
 def created(obj):
+    if isinstance(obj, BaseJsonResponce):
+        return obj.js(), 201
     return obj, 201
 
 
