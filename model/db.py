@@ -139,7 +139,7 @@ class Message(ndb.Model):
     @classmethod
     def by_forum(cls, forum_key, cursor):
         page_size = int(os.environ['PAGE_SIZE'])
-        query = cls.query(cls.forum_key == forum_key)
+        query = cls.query(cls.forum_key == forum_key).order(-cls.creation_time)
 
         if cursor:
             cursor_obj = Cursor.from_websafe_string(cursor)

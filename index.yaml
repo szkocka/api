@@ -1,0 +1,6 @@
+indexes:
+- kind: Message
+  properties:
+  - name: forum_key
+  - name: creation_time
+    direction: desc
