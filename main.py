@@ -5,12 +5,12 @@ from apis.pages import UpdateAboutPage, GetAboutPage
 from apis.queries import FindResearches
 from apis.req_to_join import ReqToJoinResearch
 from apis.forums import GetForum, ListForums, AddForum
-from apis.me import Me
+from apis.me import Me, MyInvites, AcceptMyInvite
 from apis.news import AddNews, ListNews
-from apis.researchers import AddResearcher, RemoveResearcher
+from apis.researchers import InviteResearcher, RemoveResearcher
 from apis.researches import AddResearch, UpdateResearch, GetResearch, ListTags
 from apis.researches import ListResearches
-from apis.tasks.tasks import ProcessResearchers, IndexResearch
+from apis.tasks.tasks import IndexResearch
 from apis.upload import UploadImage
 from apis.users import CreateUser, UserDetails, UpdateUser
 from flask import Flask
@@ -42,7 +42,7 @@ api.add_resource(GetForum, '/forums/<forum_id>')
 api.add_resource(AddMessage, '/forums/<forum_id>/messages')
 api.add_resource(ListMessages, '/forums/<forum_id>/messages')
 
-api.add_resource(AddResearcher, '/researches/<research_id>/researchers')
+api.add_resource(InviteResearcher, '/researches/<research_id>/researchers')
 api.add_resource(RemoveResearcher, '/researches/<research_id>/researchers/<user_id>')
 api.add_resource(ReqToJoinResearch, '/researches/<research_id>/join')
 
@@ -50,6 +50,8 @@ api.add_resource(CreateUser, '/users')
 api.add_resource(UpdateUser, '/users')
 api.add_resource(UserDetails, '/users/<user_id>')
 api.add_resource(Me, '/users/me')
+api.add_resource(MyInvites, '/users/me/invites')
+api.add_resource(AcceptMyInvite, '/users/me/invites/<invite_id>/accepted')
 
 api.add_resource(AuthLocalLogin, '/auth/local')
 api.add_resource(UploadImage, '/upload')
@@ -57,5 +59,4 @@ api.add_resource(UploadImage, '/upload')
 api.add_resource(UpdateAboutPage, '/pages/about')
 api.add_resource(GetAboutPage, '/pages/about')
 
-api.add_resource(ProcessResearchers, '/tasks/process-researchers')
 api.add_resource(IndexResearch, '/tasks/index-research')

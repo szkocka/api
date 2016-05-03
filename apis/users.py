@@ -1,5 +1,3 @@
-import json
-
 from flask import request
 from flask.ext.restful import Resource
 
@@ -9,8 +7,6 @@ from common.util import hash_password
 from common.validation import validate_request
 from common.security import Token, authenticate
 from model.db import User, Research
-from google.appengine.api import taskqueue
-
 from model.resp import UserDetailsJson
 
 
@@ -34,7 +30,6 @@ class CreateUser(Resource):
                     hashed_password=hash_password(password))
 
         user_key = user.put()
-        add_task(user_key)
 
         return created(Token(user_key.id()).json())
 
@@ -60,10 +55,3 @@ class UserDetails(Resource):
         researcher_in = Research.by_researcher(user.key)
 
         return ok(UserDetailsJson(user, supervisor_of, researcher_in))
-
-
-def add_task(user_key):
-    payload = {'researcher_id': user_key.id()}
-    taskqueue.add(url='/tasks/process-researchers',
-                  payload=json.dumps(payload),
-                  headers={'Content-Type': 'application/json'})

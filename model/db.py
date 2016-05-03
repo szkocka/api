@@ -103,6 +103,10 @@ class ResearchInvite(ndb.Model):
     creation_time = ndb.DateTimeProperty(auto_now_add=True)
 
     @classmethod
+    def get(cls, _id):
+        return cls.get_by_id(_id)
+
+    @classmethod
     def by_email(cls, email):
         return cls.query(cls.email == email).fetch()
 

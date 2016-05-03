@@ -74,6 +74,13 @@ class MessageJson(BaseJsonResponce):
         self.message = message.text
 
 
+class MyInvitationJson(BaseJsonResponce):
+    def __init__(self, invitation):
+        self.id = invitation.key.id()
+        research = invitation.research_key.get()
+        self.research_name = research.title
+
+
 class ResearchIdJson(BaseJsonResponce):
     def __init__(self, research_key):
         self.research_id = research_key.id()
@@ -133,6 +140,11 @@ class ListMessagesJson(BaseJsonResponce):
         self.cursor = None
         if cursor:
             self.cursor = cursor.urlsafe()
+
+
+class ListMyInvitations(BaseJsonResponce):
+    def __init__(self, invitations):
+        self.invitations = map(lambda i: MyInvitationJson(i).js(), invitations)
 
 
 class ResearchesSearchResultJson(BaseJsonResponce):
