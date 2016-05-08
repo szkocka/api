@@ -1,10 +1,10 @@
 from flask.ext.restful import Resource
 from flask import request
-from common.http_responses import ok_msg
+from common.http_responses import ok_msg, bad_request
 from common.insert_wraps import insert_research, insert_user
 from common.security import is_supervisor, authenticate
 from common.validation import validate_request
-from model.db import ResearchInvite
+from model.db import ResearchRelationship, RelationshipType
 from emails import sender
 from emails.views import InviteToJoinSubj, InviteToJoin
 
@@ -13,33 +13,47 @@ class RemoveResearcher(Resource):
     method_decorators = [is_supervisor, insert_research, insert_user, authenticate]
 
     def delete(self, current_user, research, user):
+        self.__delete_relationship(research, user)
+        self.__delete_researcher(research, user)
+
+        return ok_msg('Researcher removed from research.')
+
+    def __delete_researcher(self, research, user):
         research.researchers_keys.remove(user.key)
         research.put()
 
-        return ok_msg('Researcher removed from research.')
+    def __delete_relationship(self, research, user):
+        relationship = ResearchRelationship.get(research.key, user.email)
+        relationship.key.delete()
 
 
 class InviteResearcher(Resource):
     method_decorators = [is_supervisor, insert_research, validate_request, authenticate]
-    required_fields = ['email']  # used by validate_request
+    required_fields = ['email', 'name']  # used by validate_request
 
     def post(self, research, current_user):
         recipient = request.json['email']
+        name = request.json['name']
         text = request.json.get('text', '')
+
+        if self.__relationship_exists(research, recipient):
+            return bad_request('Already invited.')
+        self.__add_relationship(research, recipient)
+
         supervisor = current_user.name
         title = research.title
         description = research.brief_desc
 
-        researcher = self.__add_invite(research, recipient)
-
-        subj = InviteToJoinSubj(supervisor, title)
-        body = InviteToJoin(supervisor, title, description, researcher, text)
-        sender.send_email(subj, body, recipient)
+        subj_view = InviteToJoinSubj(supervisor, title)
+        body_view = InviteToJoin(supervisor, title, description, name, text)
+        sender.send_email(subj_view, body_view, recipient)
 
         return ok_msg("Invitation send to {0}".format(recipient))
 
-    def __add_invite(self, research, recipient):
-        invite = ResearchInvite(research_key=research.key, email=recipient)
-        invite.put()
+    def __relationship_exists(self, research, recipient):
+        return ResearchRelationship.get(research.key, recipient)
 
-        return recipient
+    def __add_relationship(self, research, recipient):
+        ResearchRelationship(research_key=research.key,
+                             user_email=recipient,
+                             type=RelationshipType.INVITED).put()

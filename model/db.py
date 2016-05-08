@@ -1,4 +1,3 @@
-import logging
 import os
 
 from google.appengine.datastore.datastore_query import Cursor
@@ -97,18 +96,48 @@ class Research(ndb.Model):
         return cls.query(cls.researchers_keys == user_key).fetch()
 
 
-class ResearchInvite(ndb.Model):
+class RelationshipType:
+    NONE = 'NONE'
+    INVITED = 'INVITED'
+    ACCEPTED = 'ACCEPTED'
+    DECLINED = 'DECLINED'
+    WANTS_TO_JOIN = 'WANTS_TO_JOIN'
+    APPROVED = 'APPROVED'
+    REJECTED = 'REJECTED'
+    SUPERVISOR = 'SUPERVISOR'
+
+
+class ResearchRelationship(ndb.Model):
     research_key = ndb.KeyProperty(kind=Research)
-    email = ndb.StringProperty()
+    user_email = ndb.StringProperty()
+    type = ndb.StringProperty()
     creation_time = ndb.DateTimeProperty(auto_now_add=True)
+    last_update_time = ndb.DateTimeProperty(auto_now=True)
 
     @classmethod
-    def get(cls, _id):
-        return cls.get_by_id(_id)
+    def get(cls, research_key, email):
+        return cls.query(ndb.AND(
+                cls.research_key == research_key,
+                cls.user_email == email
+        )).get()
+
+    @classmethod
+    def by_email_and_type(cls, email, type):
+        return cls.query(ndb.AND(
+                cls.type == type,
+                cls.user_email == email
+        )).fetch()
 
     @classmethod
     def by_email(cls, email):
-        return cls.query(cls.email == email).fetch()
+        return cls.query(cls.user_email == email).fetch()
+
+    @classmethod
+    def by_research_and_type(cls, research_key, type):
+        return cls.query(ndb.AND(
+                cls.type == type,
+                cls.research_key == research_key
+        )).fetch()
 
 
 class Forum(ndb.Model):

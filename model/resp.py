@@ -1,5 +1,7 @@
 import logging
 
+from model.db import RelationshipType
+
 
 class BaseJsonResponce:
     def js(self):
@@ -18,12 +20,12 @@ class UserDetailsJson(UserJson):
     def __init__(self, user, supervisor_of, researcher_in):
         UserJson.__init__(self, user)
         self.cv = user.cv
-        self.supervisor_of = map(lambda r: ResearchJson(r).js(), supervisor_of)
-        self.researcher_in = map(lambda r: ResearchJson(r).js(), researcher_in)
+        self.supervisor_of = map(lambda r: ResearchJson(r, {}).js(), supervisor_of)
+        self.researcher_in = map(lambda r: ResearchJson(r, {}).js(), researcher_in)
 
 
 class ResearchJson(BaseJsonResponce):
-    def __init__(self, research):
+    def __init__(self, research, relationship_types):
         self.id = research.key.id()
         self.created = research.creation_time.strftime('%Y-%m-%d %H:%M:%S')
         self.title = research.title
@@ -35,11 +37,12 @@ class ResearchJson(BaseJsonResponce):
                        'detailed': research.detailed_desc
                    }
         self.image_url = research.image_url
+        self.relationship_type = relationship_types.get(self.id, RelationshipType.NONE)
 
 
 class ResearchDetailsJson(ResearchJson):
-    def __init__(self, research):
-        ResearchJson.__init__(self, research)
+    def __init__(self, research, relationship_types):
+        ResearchJson.__init__(self, research, relationship_types)
         self.supervisor = UserJson(research.supervisor_key.get()).js()
         self.researchers = map(lambda key: UserJson(key.get()).js(),
                                research.researchers_keys)
@@ -116,8 +119,8 @@ class ListNewsJson(BaseJsonResponce):
 
 
 class ListResearchesJson(BaseJsonResponce):
-    def __init__(self, researches, cursor):
-        self.researches = map(lambda r: ResearchDetailsJson(r).js(), researches)
+    def __init__(self, researches, relationship_types, cursor):
+        self.researches = map(lambda r: ResearchDetailsJson(r, relationship_types).js(), researches)
 
         self.cursor = None
         if cursor:
@@ -143,10 +146,15 @@ class ListMessagesJson(BaseJsonResponce):
 
 
 class ListMyInvitations(BaseJsonResponce):
-    def __init__(self, invitations):
-        self.invitations = map(lambda i: MyInvitationJson(i).js(), invitations)
+    def __init__(self, researches):
+        self.researches = map(lambda r: ResearchJson(r, {}).js(), researches)
+
+
+class ListReqToJoin(BaseJsonResponce):
+    def __init__(self, users):
+        self.users = map(lambda u: UserJson(u).js(), users)
 
 
 class ResearchesSearchResultJson(BaseJsonResponce):
     def __init__(self, researches):
-        self.researches = map(lambda r: ResearchDetailsJson(r).js(), researches)
+        self.researches = map(lambda r: ResearchDetailsJson(r, {}).js(), researches)

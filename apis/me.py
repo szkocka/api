@@ -1,8 +1,9 @@
 from flask.ext.restful import Resource
 
-from common.http_responses import ok, ok_msg, forbidden, not_found
+from common.http_responses import ok, ok_msg, bad_request
+from common.insert_wraps import insert_research
 from common.security import authenticate
-from model.db import ResearchInvite
+from model.db import ResearchRelationship, RelationshipType
 from model.resp import ListMyInvitations
 
 
@@ -28,27 +29,39 @@ class MyInvites(Resource):
     method_decorators = [authenticate]
 
     def get(self, current_user):
-        my_invites = ResearchInvite.by_email(current_user.email)
-        return ListMyInvitations(my_invites).js()
+        relationships = ResearchRelationship.by_email_and_type(current_user.email, RelationshipType.INVITED)
+        researches = map(lambda r: r.research_key.get(), relationships)
+        return ListMyInvitations(researches).js()
 
 
-class AcceptMyInvite(Resource):
-    method_decorators = [authenticate]
+class AcceptInvite(Resource):
+    method_decorators = [insert_research, authenticate]
 
-    def post(self, current_user, invite_id):
-        invite = ResearchInvite.get(int(invite_id))
+    def post(self, current_user, research):
+        relationship = ResearchRelationship.get(research.key, current_user.email)
 
-        if not invite:
-            return not_found('Invite not found.')
-
-        if invite.email != current_user.email:
-            return forbidden('It is not your invite.')
-
-        research = invite.research_key.get()
+        if not relationship or relationship.type != RelationshipType.INVITED:
+            return bad_request('You not invited.')
 
         research.researchers_keys.append(current_user.key)
         research.put()
 
-        invite.key.delete()
+        relationship.type = RelationshipType.ACCEPTED
+        relationship.put()
 
         return ok_msg('Invitation accepted.')
+
+
+class RejectInvite(Resource):
+    method_decorators = [insert_research, authenticate]
+
+    def post(self, current_user, research):
+        relationship = ResearchRelationship.get(research.key, current_user.email)
+
+        if not relationship or relationship.type != RelationshipType.INVITED:
+            return bad_request('You not invited.')
+
+        relationship.type = RelationshipType.REJECTED
+        relationship.put()
+
+        return ok_msg('Invitation rejected.')

@@ -7,24 +7,47 @@ from google.appengine.api import taskqueue
 from common.http_responses import ok, created
 from common.insert_wraps import insert_research
 from common.validation import validate_request
-from common.security import authenticate, is_supervisor
-from model.db import Research
+from common.security import authenticate, is_supervisor, optional_authenticate
+from model.db import Research, ResearchRelationship, RelationshipType
 from model.resp import TagsJson, ResearchIdJson, ListResearchesJson, ResearchDetailsJson
 
 
 class ListResearches(Resource):
-    def get(self):
+    method_decorators = [optional_authenticate]
+
+    def get(self, current_user):
+        relationship_types = self.__get_relationship_types(current_user)
+
         cursor = request.args.get('cursor')
         researches, cursor, _ = Research.all(cursor)
 
-        return ok(ListResearchesJson(researches, cursor))
+        return ok(ListResearchesJson(researches, relationship_types, cursor))
+
+    def __get_relationship_types(self, current_user):
+        relationship_types = {}
+        if current_user:
+            relationship = ResearchRelationship.by_email(current_user.email)
+            for r in relationship:
+                relationship_types[r.research_key.id()] = r.type
+
+        return relationship_types
 
 
 class GetResearch(Resource):
-    method_decorators = [insert_research]
+    method_decorators = [insert_research, optional_authenticate]
 
-    def get(self, research):
-        return ok(ResearchDetailsJson(research))
+    def get(self, research, current_user):
+        relationship_types = self.__get_relationship_type(current_user, research)
+        return ok(ResearchDetailsJson(research, relationship_types))
+
+    def __get_relationship_type(self, current_user, research):
+        relationship_types = {}
+        if current_user:
+            relationship = ResearchRelationship.get(research.key, current_user.email)
+            if relationship:
+                relationship_types[research.key.id()] = relationship.type
+
+        return relationship_types
 
 
 class AddResearch(Resource):
@@ -32,11 +55,16 @@ class AddResearch(Resource):
     required_fields = ['title', 'area', 'description']  # used by validate_request
 
     def post(self, current_user):
-        research = self.__create(current_user, request.json)
-        research_key = research.put()
-        add_task(research_key)
+        research_key = self.__create(current_user, request.json)
+        self.__add_relationship(research_key, current_user)
 
+        add_task(research_key)
         return created(ResearchIdJson(research_key))
+
+    def __add_relationship(self, research_key, current_user):
+        ResearchRelationship(research_key=research_key,
+                             user_email=current_user.email,
+                             type=RelationshipType.SUPERVISOR).put()
 
     def __create(self, current_user, json):
         description = json['description']
@@ -58,7 +86,7 @@ class AddResearch(Resource):
                 status='active',
                 brief_desc=brief_desc,
                 detailed_desc=detailed_desc,
-                image_url=image_url)
+                image_url=image_url).put()
 
 
 class UpdateResearch(Resource):

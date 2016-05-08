@@ -46,6 +46,33 @@ def authenticate(func):
     return wrapper
 
 
+def optional_authenticate(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+
+        if 'Authorization' not in request.headers:
+            kwargs['current_user'] = None
+            return func(*args, **kwargs)
+
+        authorization = request.headers['Authorization']
+        token = authorization.replace('Bearer ', '')
+        try:
+            user_id = TOKEN_UTIL.verify(token)
+        except SignatureExpired:
+            return unauthorized('Token expired.')
+        except BadSignature:
+            return unauthorized('Invalid token.')
+
+        user = User.get(int(user_id))
+
+        if not user:
+            return unauthorized('User not found.')
+
+        kwargs['current_user'] = user
+        return func(*args, **kwargs)
+
+    return wrapper
+
 def is_researcher(func):
     def __is_researcher(research, user):
         return user.is_supervisor_of(research) or user.is_researcher_of(research)
