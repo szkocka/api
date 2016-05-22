@@ -4,6 +4,8 @@ import os
 from itsdangerous import TimedJSONWebSignatureSerializer as TokenSerializer
 import inspect
 
+from model.db import ResearchRelationship
+
 
 class TokenUtil:
     def __init__(self):
@@ -28,3 +30,13 @@ def im_self(func):
         closures = func.func_closure
         method = closures[-1].cell_contents
         return im_self(method)
+
+
+def get_relationship_types(user):
+    relationship_types = {}
+    if user:
+        relationship = ResearchRelationship.by_email(user.email)
+        for r in relationship:
+            relationship_types[r.research_key.id()] = r.type
+
+    return relationship_types

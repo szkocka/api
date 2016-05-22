@@ -57,6 +57,9 @@ class ApproveResearcher(Resource):
         relationship.type = RelationshipType.APPROVED
         relationship.put()
 
+        user.researcher_in += 1
+        user.put()
+
         return ok_msg('Researcher accepted.')
 
 

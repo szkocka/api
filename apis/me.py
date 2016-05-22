@@ -49,6 +49,9 @@ class AcceptInvite(Resource):
         relationship.type = RelationshipType.ACCEPTED
         relationship.put()
 
+        current_user.researcher_in += 1
+        current_user.put()
+
         return ok_msg('Invitation accepted.')
 
 

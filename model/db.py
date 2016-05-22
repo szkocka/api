@@ -4,6 +4,12 @@ from google.appengine.datastore.datastore_query import Cursor
 from google.appengine.ext import ndb
 
 
+class StatusType:
+    ACTIVE = 'ACTIVE'
+    DELETED = 'DELETED'
+    BANNED = 'BANNED'
+
+
 class User(ndb.Model):
     name = ndb.StringProperty()
     email = ndb.StringProperty()
@@ -12,6 +18,11 @@ class User(ndb.Model):
     cv = ndb.TextProperty()
     creation_time = ndb.DateTimeProperty(auto_now_add=True)
     last_update_time = ndb.DateTimeProperty(auto_now=True)
+    status = ndb.StringProperty()
+    supervisor_in = ndb.IntegerProperty(default=0)
+    researcher_in = ndb.IntegerProperty(default=0)
+    created_forums = ndb.IntegerProperty(default=0)
+    posted_messages = ndb.IntegerProperty(default=0)
 
     @classmethod
     def get(cls, _id):
@@ -38,11 +49,12 @@ class User(ndb.Model):
     @classmethod
     def all(cls, cursor):
         page_size = int(os.environ['PAGE_SIZE'])
+        q = cls.query(cls.status != StatusType.DELETED).order(cls.status, cls.key)
 
         if cursor:
             cursor_obj = Cursor.from_websafe_string(cursor)
-            return cls.query().fetch_page(page_size, start_cursor=cursor_obj)
-        return cls.query().fetch_page(page_size)
+            return q.fetch_page(page_size, start_cursor=cursor_obj)
+        return q.fetch_page(page_size)
 
     def is_supervisor_of(self, research):
         return self.key == research.supervisor_key
@@ -71,12 +83,12 @@ class Research(ndb.Model):
     @classmethod
     def all(cls, cursor):
         page_size = int(os.environ['PAGE_SIZE'])
-        query = cls.query()
+        q = cls.query(cls.status != StatusType.DELETED).order(cls.status, cls.key)
 
         if cursor:
             cursor_obj = Cursor.from_websafe_string(cursor)
-            return query.fetch_page(page_size, start_cursor=cursor_obj)
-        return query.fetch_page(page_size)
+            return q.fetch_page(page_size, start_cursor=cursor_obj)
+        return q.fetch_page(page_size)
 
     @classmethod
     def all_tags(cls):
@@ -86,6 +98,19 @@ class Research(ndb.Model):
             tags.update(r.tags)
 
         return list(tags)
+
+    @classmethod
+    def by_user(cls, user_key, cursor):
+        page_size = int(os.environ['PAGE_SIZE'])
+        q = cls.query(ndb.OR(
+                cls.supervisor_key == user_key,
+                cls.researchers_keys == user_key),
+                cls.status != StatusType.DELETED).order(cls.status, cls.key)
+
+        if cursor:
+            cursor_obj = Cursor.from_websafe_string(cursor)
+            return q.fetch_page(page_size, start_cursor=cursor_obj)
+        return q.fetch_page(page_size)
 
     @classmethod
     def by_supervisor(cls, user_key):
@@ -116,17 +141,15 @@ class ResearchRelationship(ndb.Model):
 
     @classmethod
     def get(cls, research_key, email):
-        return cls.query(ndb.AND(
+        return cls.query(
                 cls.research_key == research_key,
-                cls.user_email == email
-        )).get()
+                cls.user_email == email).get()
 
     @classmethod
     def by_email_and_type(cls, email, type):
-        return cls.query(ndb.AND(
+        return cls.query(
                 cls.type == type,
-                cls.user_email == email
-        )).fetch()
+                cls.user_email == email).fetch()
 
     @classmethod
     def by_email(cls, email):
@@ -134,10 +157,9 @@ class ResearchRelationship(ndb.Model):
 
     @classmethod
     def by_research_and_type(cls, research_key, type):
-        return cls.query(ndb.AND(
+        return cls.query(
                 cls.type == type,
-                cls.research_key == research_key
-        )).fetch()
+                cls.research_key == research_key).fetch()
 
 
 class Forum(ndb.Model):
@@ -146,6 +168,7 @@ class Forum(ndb.Model):
     subject = ndb.TextProperty()
     creation_time = ndb.DateTimeProperty(auto_now_add=True)
     last_update_time = ndb.DateTimeProperty(auto_now=True)
+    status = ndb.StringProperty()
 
     @classmethod
     def get(cls, _id):
@@ -154,7 +177,21 @@ class Forum(ndb.Model):
     @classmethod
     def by_research(cls, research_key, cursor):
         page_size = int(os.environ['PAGE_SIZE'])
-        query = cls.query(cls.research_key == research_key)
+        query = cls.query(
+                cls.status != StatusType.DELETED,
+                cls.research_key == research_key).order(cls.status, cls.key)
+
+        if cursor:
+            cursor_obj = Cursor.from_websafe_string(cursor)
+            return query.fetch_page(page_size, start_cursor=cursor_obj)
+        return query.fetch_page(page_size)
+
+    @classmethod
+    def by_creator(cls, user_key, cursor):
+        page_size = int(os.environ['PAGE_SIZE'])
+        query = cls.query(
+                cls.status != StatusType.DELETED,
+                cls.creator_key == user_key).order(cls.status, cls.key)
 
         if cursor:
             cursor_obj = Cursor.from_websafe_string(cursor)
@@ -168,11 +205,26 @@ class Message(ndb.Model):
     text = ndb.TextProperty()
     creation_time = ndb.DateTimeProperty(auto_now_add=True)
     last_update_time = ndb.DateTimeProperty(auto_now=True)
+    status = ndb.StringProperty()
 
     @classmethod
-    def by_forum(cls, forum_key, cursor):
+    def by_forum(cls, user_key, cursor):
         page_size = int(os.environ['PAGE_SIZE'])
-        query = cls.query(cls.forum_key == forum_key).order(-cls.creation_time)
+        query = cls.query(
+                cls.status != StatusType.DELETED,
+                cls.creator_key == user_key).order(cls.status, -cls.creation_time, cls.key)
+
+        if cursor:
+            cursor_obj = Cursor.from_websafe_string(cursor)
+            return query.fetch_page(page_size, start_cursor=cursor_obj)
+        return query.fetch_page(page_size)
+
+    @classmethod
+    def by_creator(cls, user_key, cursor):
+        page_size = int(os.environ['PAGE_SIZE'])
+        query = cls.query(
+                cls.status != StatusType.DELETED,
+                cls.creator_key == user_key).order(cls.status, -cls.creation_time, cls.key)
 
         if cursor:
             cursor_obj = Cursor.from_websafe_string(cursor)

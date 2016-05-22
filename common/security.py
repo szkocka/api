@@ -23,6 +23,7 @@ def authenticate(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
 
+        logging.info('Headers: ' + str(request.headers))
         if 'Authorization' not in request.headers:
             return unauthorized('Token not present.')
 
@@ -72,6 +73,7 @@ def optional_authenticate(func):
         return func(*args, **kwargs)
 
     return wrapper
+
 
 def is_researcher(func):
     def __is_researcher(research, user):

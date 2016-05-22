@@ -4,3 +4,25 @@ indexes:
   - name: forum_key
   - name: creation_time
     direction: desc
+
+- kind: Message
+  properties:
+  - name: creator_key
+  - name: status
+  - name: creation_time
+    direction: desc
+
+- kind: Forum
+  properties:
+  - name: creator_key
+  - name: status
+
+- kind: Research
+  properties:
+  - name: supervisor_key
+  - name: status
+
+- kind: Research
+  properties:
+  - name: researchers_keys
+  - name: status

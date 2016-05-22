@@ -14,6 +14,11 @@ class UserJson(BaseJsonResponce):
         self.id = user.key.id()
         self.name = user.name
         self.email = user.email
+        self.status = user.status
+        self.supervisor_in = user.supervisor_in
+        self.researcher_in = user.researcher_in
+        self.created_forums = user.created_forums
+        self.posted_messages = user.posted_messages
 
 
 class UserDetailsJson(UserJson):
@@ -55,6 +60,7 @@ class ForumJson(BaseJsonResponce):
         self.created = forum.creation_time.strftime('%Y-%m-%d %H:%M:%S')
         self.subject = forum.subject
         self.research = forum.research_key.id()
+        self.status = forum.status
 
 
 class NewsJson(BaseJsonResponce):
@@ -155,6 +161,26 @@ class ListReqToJoin(BaseJsonResponce):
         self.users = map(lambda u: UserJson(u).js(), users)
 
 
+class ListUsers(BaseJsonResponce):
+    def __init__(self, users, cursor):
+        self.users = map(lambda u: UserJson(u).js(), users)
+
+        self.cursor = None
+        if cursor:
+            self.cursor = cursor.urlsafe()
+
+
+class ListUserResearchesJson(BaseJsonResponce):
+    def __init__(self, researches, relationship_types, cursor):
+        self.researches = map(lambda r: ResearchJson(r, relationship_types).js(), researches)
+
+        self.cursor = None
+        if cursor:
+            self.cursor = cursor.urlsafe()
+
+
 class ResearchesSearchResultJson(BaseJsonResponce):
     def __init__(self, researches):
         self.researches = map(lambda r: ResearchDetailsJson(r, {}).js(), researches)
+
+

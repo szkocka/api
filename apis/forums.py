@@ -5,7 +5,7 @@ from common.http_responses import created, ok
 from common.insert_wraps import insert_forum, insert_research
 from common.validation import validate_request
 from common.security import authenticate, is_researcher
-from model.db import Forum
+from model.db import Forum, StatusType
 from model.resp import ForumIdJson, ListForumsJson, ForumJson
 
 
@@ -26,9 +26,12 @@ class AddForum(Resource):
     def post(self, current_user, research):
         forum = Forum(creator_key=current_user.key,
                       research_key=research.key,
+                      status=StatusType.ACTIVE,
                       subject=request.json['subject'])
 
         forum_key = forum.put()
+        current_user.created_forums += 1
+        current_user.put()
         return created(ForumIdJson(forum_key))
 
 

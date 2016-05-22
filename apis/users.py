@@ -3,11 +3,11 @@ from flask.ext.restful import Resource
 
 from common.http_responses import bad_request, created, ok, ok_msg
 from common.insert_wraps import insert_user
-from common.util import hash_password
+from common.util import hash_password, get_relationship_types
 from common.validation import validate_request
-from common.security import Token, authenticate
-from model.db import User, Research
-from model.resp import UserDetailsJson
+from common.security import Token, authenticate, is_admin
+from model.db import User, Research, StatusType, Forum, Message
+from model.resp import UserDetailsJson, ListUsers, ListUserResearchesJson, ListForumsJson, ListMessagesJson
 
 
 class CreateUser(Resource):
@@ -27,6 +27,7 @@ class CreateUser(Resource):
 
         user = User(name=name, email=email, cv=cv,
                     is_admin=False,
+                    status=StatusType.ACTIVE,
                     hashed_password=hash_password(password))
 
         user_key = user.put()
@@ -55,3 +56,44 @@ class UserDetails(Resource):
         researcher_in = Research.by_researcher(user.key)
 
         return ok(UserDetailsJson(user, supervisor_of, researcher_in))
+
+
+class ListAllUsers(Resource):
+    method_decorators = [is_admin, authenticate]
+
+    def get(self, current_user):
+        cursor = request.args.get('cursor')
+        users, cursor, _ = User.all(cursor)
+
+        return ok(ListUsers(users, cursor))
+
+
+class ListUserResearches(Resource):
+    method_decorators = [is_admin, insert_user, authenticate]
+
+    def get(self, current_user, user):
+        relationship_types = get_relationship_types(user)
+        cursor = request.args.get('cursor')
+        users, cursor, _ = Research.by_user(user.key, cursor)
+
+        return ok(ListUserResearchesJson(users, relationship_types, cursor))
+
+
+class ListUserForums(Resource):
+    method_decorators = [is_admin, insert_user, authenticate]
+
+    def get(self, current_user, user):
+        cursor = request.args.get('cursor')
+        forums, cursor, _ = Forum.by_creator(user.key, cursor)
+
+        return ok(ListForumsJson(forums, cursor))
+
+
+class ListUserMessages(Resource):
+    method_decorators = [is_admin, insert_user, authenticate]
+
+    def get(self, current_user, user):
+        cursor = request.args.get('cursor')
+        messages, cursor, _ = Message.by_creator(user.key, cursor)
+
+        return ok(ListMessagesJson(messages, cursor))

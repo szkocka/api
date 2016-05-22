@@ -6,9 +6,10 @@ from google.appengine.api import taskqueue
 
 from common.http_responses import ok, created
 from common.insert_wraps import insert_research
+from common.util import get_relationship_types
 from common.validation import validate_request
 from common.security import authenticate, is_supervisor, optional_authenticate
-from model.db import Research, ResearchRelationship, RelationshipType
+from model.db import Research, ResearchRelationship, RelationshipType, StatusType
 from model.resp import TagsJson, ResearchIdJson, ListResearchesJson, ResearchDetailsJson
 
 
@@ -16,21 +17,12 @@ class ListResearches(Resource):
     method_decorators = [optional_authenticate]
 
     def get(self, current_user):
-        relationship_types = self.__get_relationship_types(current_user)
+        relationship_types = get_relationship_types(current_user)
 
         cursor = request.args.get('cursor')
         researches, cursor, _ = Research.all(cursor)
 
         return ok(ListResearchesJson(researches, relationship_types, cursor))
-
-    def __get_relationship_types(self, current_user):
-        relationship_types = {}
-        if current_user:
-            relationship = ResearchRelationship.by_email(current_user.email)
-            for r in relationship:
-                relationship_types[r.research_key.id()] = r.type
-
-        return relationship_types
 
 
 class GetResearch(Resource):
@@ -57,6 +49,8 @@ class AddResearch(Resource):
     def post(self, current_user):
         research_key = self.__create(current_user, request.json)
         self.__add_relationship(research_key, current_user)
+        current_user.supervisor_in += 1
+        current_user.put()
 
         add_task(research_key)
         return created(ResearchIdJson(research_key))
@@ -83,7 +77,7 @@ class AddResearch(Resource):
                 title=title,
                 area=area,
                 tags=tags,
-                status='active',
+                status=StatusType.ACTIVE,
                 brief_desc=brief_desc,
                 detailed_desc=detailed_desc,
                 image_url=image_url).put()
