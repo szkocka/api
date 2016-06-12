@@ -10,7 +10,7 @@ from apis.news import AddNews, ListNews
 from apis.researchers import InviteResearcher, RemoveResearcher
 from apis.researches import AddResearch, UpdateResearch, GetResearch, ListTags
 from apis.researches import ListResearches
-from apis.tasks.tasks import IndexResearch
+from apis.tasks.tasks import IndexResearch, NotifyAboutNewMessage
 from apis.upload import UploadImage
 from apis.users import CreateUser, UserDetails, UpdateUser, ListAllUsers, ListUserResearches, ListUserForums, \
     ListUserMessages
@@ -69,3 +69,4 @@ api.add_resource(UpdateAboutPage, '/pages/about')
 api.add_resource(GetAboutPage, '/pages/about')
 
 api.add_resource(IndexResearch, '/tasks/index-research')
+api.add_resource(NotifyAboutNewMessage, '/tasks/notify-new-message')

@@ -12,9 +12,21 @@ indexes:
   - name: creation_time
     direction: desc
 
+- kind: Message
+  properties:
+  - name: forum_key
+  - name: status
+  - name: creation_time
+    direction: desc
+
 - kind: Forum
   properties:
   - name: creator_key
+  - name: status
+
+- kind: Forum
+  properties:
+  - name: research_key
   - name: status
 
 - kind: Research

@@ -64,3 +64,43 @@ class ReqToJoin(object):
 
     def text(self):
         return self.text
+
+
+class NewMessage(object):
+    def __init__(self, researcher, message_creator, forum, text, research_id, forum_id):
+        self.researcher = researcher
+        self.message_creator = message_creator
+        self.forum = forum
+        self.text = text
+        self.research_id = research_id
+        self.forum_id = forum_id
+
+    def researcher(self):
+        return self.researcher
+
+    def message_creator(self):
+        return self.message_creator
+
+    def forum(self):
+        return self.forum
+
+    def text(self):
+        return self.text
+
+    def research_id(self):
+        return self.research_id
+
+    def forum_id(self):
+        return self.forum_id
+
+
+class NewMessageSubj(object):
+    def __init__(self, forum, research):
+        self.forum = forum
+        self.research = research
+
+    def forum(self):
+        return self.forum
+
+    def research(self):
+        return self.research

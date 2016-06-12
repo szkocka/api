@@ -208,11 +208,15 @@ class Message(ndb.Model):
     status = ndb.StringProperty()
 
     @classmethod
-    def by_forum(cls, user_key, cursor):
+    def get(cls, _id):
+        return cls.get_by_id(_id)
+
+    @classmethod
+    def by_forum(cls, forum_key, cursor):
         page_size = int(os.environ['PAGE_SIZE'])
         query = cls.query(
                 cls.status != StatusType.DELETED,
-                cls.creator_key == user_key).order(cls.status, -cls.creation_time, cls.key)
+                cls.forum_key == forum_key).order(cls.status, -cls.creation_time, cls.key)
 
         if cursor:
             cursor_obj = Cursor.from_websafe_string(cursor)

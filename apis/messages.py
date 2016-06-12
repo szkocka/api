@@ -1,5 +1,8 @@
+import json
+
 from flask import request
 from flask.ext.restful import Resource
+from google.appengine.api.taskqueue import taskqueue
 
 from common.http_responses import ok, created
 from common.insert_wraps import insert_forum
@@ -32,4 +35,14 @@ class AddMessage(Resource):
         message_key = message.put()
         current_user.posted_messages += 1
         current_user.put()
+
+        add_task(message_key.id())
+
         return created(MessageIdJson(message_key))
+
+
+def add_task(message_id):
+    payload = {'message_id': message_id}
+    taskqueue.add(url='/tasks/notify-new-message',
+                  payload=json.dumps(payload),
+                  headers={'Content-Type': 'application/json'})
