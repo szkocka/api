@@ -17,6 +17,10 @@ def created(obj):
     return obj, 201
 
 
+def accepted(msg):
+    return {'message': msg}, 202
+
+
 def bad_request(msg):
     return {'message': msg}, 400
 

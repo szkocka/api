@@ -187,6 +187,14 @@ class Forum(ndb.Model):
         return query.fetch_page(page_size)
 
     @classmethod
+    def by_creator2(cls, user_key):
+        query = cls.query(
+                cls.status != StatusType.DELETED,
+                cls.creator_key == user_key).order(cls.status, cls.key)
+
+        return query.fetch()
+
+    @classmethod
     def by_creator(cls, user_key, cursor):
         page_size = int(os.environ['PAGE_SIZE'])
         query = cls.query(

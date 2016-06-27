@@ -1,7 +1,7 @@
 from flask import request
 from flask.ext.restful import Resource
 
-from common.http_responses import bad_request, created, ok, ok_msg
+from common.http_responses import bad_request, created, ok, ok_msg, accepted
 from common.insert_wraps import insert_user
 from common.util import hash_password, get_relationship_types
 from common.validation import validate_request
@@ -97,3 +97,51 @@ class ListUserMessages(Resource):
         messages, cursor, _ = Message.by_creator(user.key, cursor)
 
         return ok(ListMessagesJson(messages, cursor))
+
+
+class DeleteUsers(Resource):
+    method_decorators = [is_admin, authenticate]
+    required_fields = ['users_ids']  # used by validate_request
+
+    def post(self, current_user):
+        json_request = request.json
+
+        users_ids = json_request['users_ids']
+        delete_posts = bool(json_request.get('delete_posts', False))
+
+        update_users_status(users_ids, delete_posts, StatusType.DELETED)
+
+        return accepted("Provided users are deleted.")
+
+
+class BanUsers(Resource):
+    method_decorators = [is_admin, authenticate]
+    required_fields = ['users_ids']  # used by validate_request
+
+    def post(self, current_user):
+        json_request = request.json
+
+        users_ids = json_request['users_ids']
+        delete_posts = bool(json_request.get('delete_posts', False))
+
+        update_users_status(users_ids, delete_posts, StatusType.BANNED)
+
+        return accepted("Provided users are banned.")
+
+
+def update_users_status(users_ids, delete_posts, status):
+    for user_id in users_ids:
+        user = User.get(user_id)
+        user.status = status
+        user.put()
+
+        if delete_posts:
+            delete_users_posts(user)
+
+
+def delete_users_posts(user):
+    forums = Forum.by_creator2(user.key)
+
+    for forum in forums:
+        forum.status = StatusType.DELETED
+        forum.put()
