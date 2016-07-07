@@ -99,6 +99,26 @@ class ListUserMessages(Resource):
         return ok(ListMessagesJson(messages, cursor))
 
 
+class UpdatePassword(Resource):
+    method_decorators = [validate_request, authenticate]
+    required_fields = ['newPassword', 'oldPassword']
+
+    def put(self, current_user):
+        json_request = request.json
+        new_password = json_request['newPassword']
+        old_password = json_request['oldPassword']
+        hashed_old_password = hash_password(old_password)
+
+        if current_user.hashed_password == hashed_old_password:
+            hashed_new_password = hash_password(new_password)
+            current_user.hashed_password = hashed_new_password
+            current_user.put()
+
+            return ok_msg('Password updated.')
+        else:
+            return bad_request('Incorrect old password.')
+
+
 class DeleteUsers(Resource):
     method_decorators = [is_admin, authenticate]
     required_fields = ['users_ids']  # used by validate_request

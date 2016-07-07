@@ -13,7 +13,7 @@ from apis.researches import ListResearches
 from apis.tasks.tasks import IndexResearch, NotifyAboutNewMessage
 from apis.upload import UploadImage
 from apis.users import CreateUser, UserDetails, UpdateUser, ListAllUsers, ListUserResearches, ListUserForums, \
-    ListUserMessages, BanUsers, DeleteUsers
+    ListUserMessages, BanUsers, DeleteUsers, UpdatePassword
 from flask import Flask
 from flask.ext.cors import CORS
 from flask.ext.restful import Api
@@ -60,6 +60,7 @@ api.add_resource(ListUserResearches, '/users/<user_id>/researches')
 api.add_resource(ListUserForums, '/users/<user_id>/forums')
 api.add_resource(ListUserMessages, '/users/<user_id>/messages')
 api.add_resource(Me, '/users/me')
+api.add_resource(UpdatePassword, '/users/me/password')
 api.add_resource(MyInvites, '/users/me/invites/researches')
 api.add_resource(AcceptInvite, '/users/me/invites/researches/<research_id>/accepted')
 api.add_resource(RejectInvite, '/users/me/invites/researches/<research_id>/declined')
