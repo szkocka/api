@@ -1,5 +1,6 @@
 from flask import request
 from flask.ext.restful import Resource
+import logging
 
 from common.http_responses import bad_request, created, ok, ok_msg, accepted
 from common.insert_wraps import insert_user
@@ -128,6 +129,7 @@ class DeleteUsers(Resource):
 
         users_ids = json_request['users_ids']
         delete_posts = bool(json_request.get('delete_posts', False))
+        logging.info(delete_posts)
 
         update_users_status(users_ids, delete_posts, StatusType.DELETED)
 
@@ -160,8 +162,8 @@ def update_users_status(users_ids, delete_posts, status):
 
 
 def delete_users_posts(user):
-    forums = Forum.by_creator2(user.key)
+    messages = Message.by_creator2(user.key)
 
-    for forum in forums:
-        forum.status = StatusType.DELETED
-        forum.put()
+    for message in messages:
+        message.status = StatusType.DELETED
+        message.put()

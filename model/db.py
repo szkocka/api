@@ -1,3 +1,4 @@
+import logging
 import os
 
 from google.appengine.datastore.datastore_query import Cursor
@@ -187,14 +188,6 @@ class Forum(ndb.Model):
         return query.fetch_page(page_size)
 
     @classmethod
-    def by_creator2(cls, user_key):
-        query = cls.query(
-                cls.status != StatusType.DELETED,
-                cls.creator_key == user_key).order(cls.status, cls.key)
-
-        return query.fetch()
-
-    @classmethod
     def by_creator(cls, user_key, cursor):
         page_size = int(os.environ['PAGE_SIZE'])
         query = cls.query(
@@ -242,6 +235,14 @@ class Message(ndb.Model):
             cursor_obj = Cursor.from_websafe_string(cursor)
             return query.fetch_page(page_size, start_cursor=cursor_obj)
         return query.fetch_page(page_size)
+
+    @classmethod
+    def by_creator2(cls, user_key):
+        query = cls.query(
+                cls.status != StatusType.DELETED,
+                cls.creator_key == user_key).order(cls.status, -cls.creation_time, cls.key)
+
+        return query.fetch()
 
 
 class News(ndb.Model):
