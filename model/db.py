@@ -31,7 +31,10 @@ class User(ndb.Model):
 
     @classmethod
     def by_email(cls, email):
-        ls = cls.query(User.email == email).fetch()
+        ls = cls.query(
+                User.email == email,
+                User.status == StatusType.ACTIVE
+        ).fetch()
         if len(ls) > 0:
             return ls[0]
         else:
@@ -40,8 +43,9 @@ class User(ndb.Model):
     @classmethod
     def by_email_and_password(cls, email, password):
         ls = cls.query(
-                cls.email == email,
-                cls.hashed_password == password).fetch()
+                User.email == email,
+                User.hashed_password == password,
+                User.status == StatusType.ACTIVE).fetch()
         if len(ls) > 0:
             return ls[0]
         else:
@@ -179,7 +183,7 @@ class Forum(ndb.Model):
     def by_research(cls, research_key, cursor):
         page_size = int(os.environ['PAGE_SIZE'])
         query = cls.query(
-                cls.status != StatusType.DELETED,
+                cls.status == StatusType.ACTIVE,
                 cls.research_key == research_key).order(cls.status, cls.key)
 
         if cursor:
@@ -191,13 +195,21 @@ class Forum(ndb.Model):
     def by_creator(cls, user_key, cursor):
         page_size = int(os.environ['PAGE_SIZE'])
         query = cls.query(
-                cls.status != StatusType.DELETED,
+                cls.status == StatusType.ACTIVE,
                 cls.creator_key == user_key).order(cls.status, cls.key)
 
         if cursor:
             cursor_obj = Cursor.from_websafe_string(cursor)
             return query.fetch_page(page_size, start_cursor=cursor_obj)
         return query.fetch_page(page_size)
+
+    @classmethod
+    def by_creator2(cls, user_key):
+        query = cls.query(
+                cls.status != StatusType.DELETED,
+                cls.creator_key == user_key).order(cls.status, cls.key)
+
+        return query.fetch()
 
 
 class Message(ndb.Model):
@@ -216,7 +228,7 @@ class Message(ndb.Model):
     def by_forum(cls, forum_key, cursor):
         page_size = int(os.environ['PAGE_SIZE'])
         query = cls.query(
-                cls.status != StatusType.DELETED,
+                cls.status == StatusType.ACTIVE,
                 cls.forum_key == forum_key).order(cls.status, -cls.creation_time, cls.key)
 
         if cursor:
@@ -228,7 +240,7 @@ class Message(ndb.Model):
     def by_creator(cls, user_key, cursor):
         page_size = int(os.environ['PAGE_SIZE'])
         query = cls.query(
-                cls.status != StatusType.DELETED,
+                cls.status == StatusType.ACTIVE,
                 cls.creator_key == user_key).order(cls.status, -cls.creation_time, cls.key)
 
         if cursor:

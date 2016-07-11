@@ -128,42 +128,50 @@ class DeleteUsers(Resource):
         json_request = request.json
 
         users_ids = json_request['users_ids']
-        delete_posts = bool(json_request.get('delete_posts', False))
-        logging.info(delete_posts)
-
-        update_users_status(users_ids, delete_posts, StatusType.DELETED)
+        update_users_status(users_ids, StatusType.DELETED, True, True)
 
         return accepted("Provided users are deleted.")
 
 
 class BanUsers(Resource):
     method_decorators = [is_admin, authenticate]
-    required_fields = ['users_ids']  # used by validate_request
+    required_fields = ['users_ids', 'ban_messages', 'ban_forums']  # used by validate_request
 
     def post(self, current_user):
         json_request = request.json
 
         users_ids = json_request['users_ids']
-        delete_posts = bool(json_request.get('delete_posts', False))
+        ban_forums = bool(json_request['ban_forums'])
+        ban_messages = bool(json_request['ban_messages'])
 
-        update_users_status(users_ids, delete_posts, StatusType.BANNED)
+        update_users_status(users_ids, StatusType.BANNED, ban_forums, ban_messages)
 
         return accepted("Provided users are banned.")
 
 
-def update_users_status(users_ids, delete_posts, status):
+def update_users_status(users_ids, status, ban_forums, ban_messages):
     for user_id in users_ids:
         user = User.get(user_id)
         user.status = status
         user.put()
 
-        if delete_posts:
-            delete_users_posts(user)
+        if ban_messages:
+            update_messages_status(user, status)
+        if ban_forums:
+            update_forums_status(user, status)
 
 
-def delete_users_posts(user):
+def update_messages_status(user, status):
     messages = Message.by_creator2(user.key)
 
     for message in messages:
-        message.status = StatusType.DELETED
+        message.status = status
         message.put()
+
+
+def update_forums_status(user, status):
+    forums = Forum.by_creator2(user.key)
+
+    for forum in forums:
+        forum.status = status
+        forum.put()
