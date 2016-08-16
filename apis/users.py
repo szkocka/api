@@ -49,6 +49,19 @@ class UpdateUser(Resource):
         return ok_msg('Profile updated.')
 
 
+class UpdateUserByAdmin(Resource):
+    method_decorators = [is_admin, insert_user, authenticate]
+
+    def put(self, current_user, user):
+        json_request = request.json
+        user.name = json_request.get('name', user.name)
+        user.cv = json_request.get('cv', user.cv)
+
+        user.put()
+
+        return ok_msg('Profile updated.')
+
+
 class UserDetails(Resource):
     method_decorators = [authenticate, insert_user]
 
@@ -149,15 +162,29 @@ class BanUsers(Resource):
         return accepted("Provided users are banned.")
 
 
-def update_users_status(users_ids, status, ban_forums, ban_messages):
+class UnBanUsers(Resource):
+    method_decorators = [is_admin, authenticate]
+    required_fields = ['users_ids']  # used by validate_request
+
+    def post(self, current_user):
+        json_request = request.json
+
+        users_ids = json_request['users_ids']
+
+        update_users_status(users_ids, StatusType.ACTIVE, True, True)
+
+        return accepted("Provided users are unbanned.")
+
+
+def update_users_status(users_ids, status, update_forums, update_messages):
     for user_id in users_ids:
         user = User.get(user_id)
         user.status = status
         user.put()
 
-        if ban_messages:
+        if update_messages:
             update_messages_status(user, status)
-        if ban_forums:
+        if update_forums:
             update_forums_status(user, status)
 
 

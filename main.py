@@ -13,7 +13,7 @@ from apis.researches import ListResearches
 from apis.tasks.tasks import IndexResearch, NotifyAboutNewMessage
 from apis.upload import UploadImage
 from apis.users import CreateUser, UserDetails, UpdateUser, ListAllUsers, ListUserResearches, ListUserForums, \
-    ListUserMessages, BanUsers, DeleteUsers, UpdatePassword
+    ListUserMessages, BanUsers, DeleteUsers, UpdatePassword, UnBanUsers, UpdateUserByAdmin
 from flask import Flask
 from flask.ext.cors import CORS
 from flask.ext.restful import Api
@@ -51,9 +51,11 @@ api.add_resource(ReqToJoinResearch, '/researches/<research_id>/requests')
 api.add_resource(ListReqToJoinResearch, '/researches/<research_id>/requests')
 
 api.add_resource(BanUsers, '/users/banned')
+api.add_resource(UnBanUsers, '/users/unbanned')
 api.add_resource(DeleteUsers, '/users/deleted')
 api.add_resource(CreateUser, '/users')
 api.add_resource(UpdateUser, '/users')
+api.add_resource(UpdateUserByAdmin, '/users/<user_id>')
 api.add_resource(ListAllUsers, '/users')
 api.add_resource(UserDetails, '/users/<user_id>')
 api.add_resource(ListUserResearches, '/users/<user_id>/researches')
