@@ -52,9 +52,16 @@ class User(ndb.Model):
             return None
 
     @classmethod
-    def all(cls, cursor):
+    def find_all(cls, cursor, keyword):
         page_size = int(os.environ['PAGE_SIZE'])
-        q = cls.query(cls.status != StatusType.DELETED).order(cls.status, cls.key)
+
+        q = cls.query(cls.status.IN([StatusType.ACTIVE, StatusType.BANNED])) \
+
+        if keyword:
+            q = q.filter(cls.email >= keyword)
+            q = q.filter(cls.email < keyword + u'\ufffd')
+
+        q = q.order(cls.email, cls.key)
 
         if cursor:
             cursor_obj = Cursor.from_websafe_string(cursor)
@@ -88,7 +95,8 @@ class Research(ndb.Model):
     @classmethod
     def all(cls, cursor):
         page_size = int(os.environ['PAGE_SIZE'])
-        q = cls.query(cls.status != StatusType.DELETED).order(cls.status, cls.key)
+        q = cls.query(cls.status.IN([StatusType.ACTIVE, StatusType.BANNED]))\
+            .order(cls.key)
 
         if cursor:
             cursor_obj = Cursor.from_websafe_string(cursor)
@@ -110,7 +118,8 @@ class Research(ndb.Model):
         q = cls.query(ndb.OR(
                 cls.supervisor_key == user_key,
                 cls.researchers_keys == user_key),
-                cls.status != StatusType.DELETED).order(cls.status, cls.key)
+                cls.status.IN([StatusType.ACTIVE, StatusType.BANNED]))\
+            .order(cls.key)
 
         if cursor:
             cursor_obj = Cursor.from_websafe_string(cursor)
@@ -251,8 +260,9 @@ class Message(ndb.Model):
     @classmethod
     def by_creator2(cls, user_key):
         query = cls.query(
-                cls.status != StatusType.DELETED,
-                cls.creator_key == user_key).order(cls.status, -cls.creation_time, cls.key)
+                cls.status.IN([StatusType.ACTIVE, StatusType.BANNED]),
+                cls.creator_key == user_key)\
+            .order(-cls.creation_time, cls.key)
 
         return query.fetch()
 

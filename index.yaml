@@ -38,3 +38,8 @@ indexes:
   properties:
   - name: researchers_keys
   - name: status
+
+- kind: User
+  properties:
+  - name: status
+  - name: email

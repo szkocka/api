@@ -77,8 +77,10 @@ class ListAllUsers(Resource):
 
     def get(self, current_user):
         cursor = request.args.get('cursor')
-        users, cursor, _ = User.all(cursor)
+        keyword = request.args.get('keyword')
 
+        users, cursor, _ = User.find_all(cursor, keyword)
+        
         return ok(ListUsers(users, cursor))
 
 
