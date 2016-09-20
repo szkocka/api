@@ -51,7 +51,7 @@ api.add_resource(ReqToJoinResearch, '/researches/<research_id>/requests')
 api.add_resource(ListReqToJoinResearch, '/researches/<research_id>/requests')
 
 api.add_resource(BanUsers, '/users/banned')
-api.add_resource(UnBanUsers, '/users/unbanned')
+api.add_resource(UnBanUsers, '/users/unbanned/<user_id>')
 api.add_resource(DeleteUsers, '/users/deleted')
 api.add_resource(CreateUser, '/users')
 api.add_resource(UpdateUser, '/users')

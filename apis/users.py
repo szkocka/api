@@ -165,22 +165,20 @@ class BanUsers(Resource):
 
 
 class UnBanUsers(Resource):
-    method_decorators = [is_admin, authenticate]
-    required_fields = ['users_ids']  # used by validate_request
+    method_decorators = [is_admin, insert_user, authenticate]
 
-    def post(self, current_user):
-        json_request = request.json
-
-        users_ids = json_request['users_ids']
-
-        update_users_status(users_ids, StatusType.ACTIVE, True, True)
-
-        return accepted("Provided users are unbanned.")
+    def post(self, current_user, user):
+        update_user_status(user, StatusType.ACTIVE, True, True)
+        return accepted("Provided user unbanned.")
 
 
 def update_users_status(users_ids, status, update_forums, update_messages):
     for user_id in users_ids:
         user = User.get(user_id)
+        update_user_status(user, status, update_forums, update_messages)
+
+
+def update_user_status(user, status, update_forums, update_messages):
         user.status = status
         user.put()
 
