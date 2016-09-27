@@ -4,9 +4,9 @@ from flask import request
 from flask.ext.restful import Resource
 from google.appengine.api.taskqueue import taskqueue
 
-from common.http_responses import ok, created
-from common.insert_wraps import insert_forum
-from common.security import is_researcher, authenticate
+from common.http_responses import ok, created, ok_msg
+from common.insert_wraps import insert_forum, insert_message
+from common.security import is_researcher, authenticate, is_admin
 from common.validation import validate_request
 from model.db import Message, StatusType
 from model.resp import ListMessagesJson, MessageIdJson
@@ -39,6 +39,25 @@ class AddMessage(Resource):
         add_task(message_key.id())
 
         return created(MessageIdJson(message_key))
+
+
+class UpdateMessage(Resource):
+    method_decorators = [is_admin, insert_message, validate_request, authenticate]
+    required_fields = ['message']  # used by validate_request
+
+    def put(self, current_user, message):
+        message.text = request.json['message']
+        message.put()
+        return ok_msg('Message updated')
+
+
+class DeleteMessage(Resource):
+    method_decorators = [is_admin, insert_message, authenticate]
+
+    def delete(self, current_user, message):
+        message.status = StatusType.DELETED
+        message.put()
+        return ok_msg('Message deleted.')
 
 
 def add_task(message_id):

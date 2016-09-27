@@ -113,6 +113,20 @@ def is_supervisor(func):
     return wrapper
 
 
+def is_supervisor_or_admin(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        research = kwargs['research']
+        current_user = kwargs['current_user']
+
+        if current_user.is_supervisor_of(research) or current_user.is_admin:
+            return func(*args, **kwargs)
+        else:
+            return forbidden('You must be supervisor to call this API.')
+
+    return wrapper
+
+
 def is_admin(func):
     @wraps(func)
     def wrapper(*args, **kwargs):

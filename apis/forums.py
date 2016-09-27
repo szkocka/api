@@ -1,10 +1,10 @@
 from flask import request
 from flask.ext.restful import Resource
 
-from common.http_responses import created, ok
+from common.http_responses import created, ok, ok_msg
 from common.insert_wraps import insert_forum, insert_research
 from common.validation import validate_request
-from common.security import authenticate, is_researcher
+from common.security import authenticate, is_researcher, is_admin
 from model.db import Forum, StatusType
 from model.resp import ForumIdJson, ListForumsJson, ForumJson
 
@@ -42,4 +42,20 @@ class GetForum(Resource):
         return ok(ForumJson(forum))
 
 
+class UpdateForum(Resource):
+    method_decorators = [is_admin, insert_forum, validate_request, authenticate]
+    required_fields = ['subject']  # used by validate_request
 
+    def put(self, current_user, forum):
+        forum.subject = request.json['subject']
+        forum.put()
+        return ok_msg('Forum is updated.')
+
+
+class DeleteForum(Resource):
+    method_decorators = [is_admin, insert_forum, authenticate]
+
+    def delete(self, current_user, forum):
+        forum.status = StatusType.DELETED
+        forum.put()
+        return ok_msg('Forum is deleted.')

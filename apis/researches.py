@@ -8,7 +8,7 @@ from common.http_responses import ok, created
 from common.insert_wraps import insert_research
 from common.util import get_relationship_types
 from common.validation import validate_request
-from common.security import authenticate, is_supervisor, optional_authenticate
+from common.security import authenticate, is_supervisor, optional_authenticate, is_supervisor_or_admin
 from model.db import Research, ResearchRelationship, RelationshipType, StatusType
 from model.resp import TagsJson, ResearchIdJson, ListResearchesJson, ResearchDetailsJson
 
@@ -84,7 +84,7 @@ class AddResearch(Resource):
 
 
 class UpdateResearch(Resource):
-    method_decorators = [is_supervisor, insert_research, authenticate]
+    method_decorators = [is_supervisor_or_admin, insert_research, authenticate]
 
     def put(self, research, current_user):
         json = request.json

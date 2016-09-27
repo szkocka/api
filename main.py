@@ -1,10 +1,10 @@
 """`main` is the top level module for your Flask application."""
 from apis.auth import AuthLocalLogin
-from apis.messages import AddMessage, ListMessages
+from apis.messages import AddMessage, ListMessages, UpdateMessage, DeleteMessage
 from apis.pages import UpdateAboutPage, GetAboutPage
 from apis.queries import FindResearches
 from apis.req_to_join import ReqToJoinResearch, ApproveResearcher, RejectResearcher, ListReqToJoinResearch
-from apis.forums import GetForum, ListForums, AddForum
+from apis.forums import GetForum, ListForums, AddForum, UpdateForum, DeleteForum
 from apis.me import Me, MyInvites, AcceptInvite, RejectInvite
 from apis.news import AddNews, ListNews
 from apis.researchers import InviteResearcher, RemoveResearcher
@@ -40,8 +40,12 @@ api.add_resource(ListForums, '/researches/<research_id>/forums')
 api.add_resource(AddForum, '/researches/<research_id>/forums')
 
 api.add_resource(GetForum, '/forums/<forum_id>')
+api.add_resource(UpdateForum, '/forums/<forum_id>')
+api.add_resource(DeleteForum, '/forums/<forum_id>')
 api.add_resource(AddMessage, '/forums/<forum_id>/messages')
 api.add_resource(ListMessages, '/forums/<forum_id>/messages')
+api.add_resource(UpdateMessage, '/forums/messages/<message_id>')
+api.add_resource(DeleteMessage, '/forums/messages/<message_id>')
 
 api.add_resource(InviteResearcher, '/researches/<research_id>/invites')
 api.add_resource(RemoveResearcher, '/researches/<research_id>/researchers/<user_id>')

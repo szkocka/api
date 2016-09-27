@@ -42,6 +42,10 @@ def forum_not_found(_id):
     return not_found(msg)
 
 
+def message_not_found(_id):
+    msg = 'Message with ID: {0} not found.'.format(_id)
+    return not_found(msg)
+
 def user_not_found(_id):
     msg = 'User with ID: {0} not found.'.format(_id)
     return not_found(msg)
