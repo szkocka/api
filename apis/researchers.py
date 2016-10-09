@@ -1,10 +1,10 @@
 from flask.ext.restful import Resource
 from flask import request
-from common.http_responses import ok_msg, bad_request
+from common.http_responses import ok_msg, bad_request, not_found
 from common.insert_wraps import insert_research, insert_user
-from common.security import is_supervisor, authenticate
+from common.security import is_supervisor, authenticate, is_admin
 from common.validation import validate_request
-from model.db import ResearchRelationship, RelationshipType
+from model.db import ResearchRelationship, RelationshipType, User
 from emails import sender
 from emails.views import InviteToJoinSubj, InviteToJoin
 
@@ -57,3 +57,31 @@ class InviteResearcher(Resource):
         ResearchRelationship(research_key=research.key,
                              user_email=recipient,
                              type=RelationshipType.INVITED).put()
+
+
+class UpdateSupervisor(Resource):
+    method_decorators = [is_admin, insert_research, validate_request, authenticate]
+    required_fields = ['new_supervisor']
+
+    def put(self, current_user, research):
+        new_supervisor = request.json['new_supervisor']
+        supervisor = User.get(int(new_supervisor))
+
+        if not supervisor:
+            return not_found('User with id not found.')
+
+        self.__delete_relationship(research, research.supervisor_key.get())
+        research.supervisor_key = supervisor.key
+        research.put()
+        self.__add_relationship(research.key, supervisor)
+
+        return ok_msg('Supervisor is updated.')
+
+    def __delete_relationship(self, research, user):
+        relationship = ResearchRelationship.get(research.key, user.email)
+        relationship.key.delete()
+
+    def __add_relationship(self, research_key, user):
+        ResearchRelationship(research_key=research_key,
+                         user_email=user.email,
+                         type=RelationshipType.SUPERVISOR).put()

@@ -104,3 +104,23 @@ class NewMessageSubj(object):
 
     def research(self):
         return self.research
+
+
+class ResetPasswordSubj(object):
+    def __init__(self, user):
+        self.user = user
+
+    def user(self):
+        return self.user
+
+
+class ResetPasswordBody(object):
+    def __init__(self, user, url):
+        self.user = user
+        self.url = url
+
+    def user(self):
+        return self.user
+
+    def url(self):
+        return self.url

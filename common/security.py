@@ -91,10 +91,10 @@ def is_researcher(func):
         else:
             return bad_request("Can't get info about research.")
 
-        if not __is_researcher(research, current_user):
+        if __is_researcher(research, current_user) or current_user.is_admin:
+            return func(*args, **kwargs)
+        else:
             return forbidden('You must be researcher to call this API.')
-
-        return func(*args, **kwargs)
 
     return wrapper
 
@@ -105,21 +105,8 @@ def is_supervisor(func):
         research = kwargs['research']
         current_user = kwargs['current_user']
 
-        if not current_user.is_supervisor_of(research):
-            return forbidden('You must be supervisor to call this API.')
-
-        return func(*args, **kwargs)
-
-    return wrapper
-
-
-def is_supervisor_or_admin(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        research = kwargs['research']
-        current_user = kwargs['current_user']
-
-        if current_user.is_supervisor_of(research) or current_user.is_admin:
+        if current_user.is_supervisor_of(research)\
+                or current_user.is_admin:
             return func(*args, **kwargs)
         else:
             return forbidden('You must be supervisor to call this API.')

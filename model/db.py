@@ -199,7 +199,8 @@ class Forum(ndb.Model):
         page_size = int(os.environ['PAGE_SIZE'])
         query = cls.query(
                 cls.status == StatusType.ACTIVE,
-                cls.research_key == research_key).order(cls.status, cls.key)
+                cls.research_key == research_key)\
+            .order(-cls.creation_time, cls.status, cls.key)
 
         if cursor:
             cursor_obj = Cursor.from_websafe_string(cursor)
@@ -251,7 +252,8 @@ class Message(ndb.Model):
         page_size = int(os.environ['PAGE_SIZE'])
         query = cls.query(
                 cls.status == StatusType.ACTIVE,
-                cls.forum_key == forum_key).order(cls.status, -cls.creation_time, cls.key)
+                cls.forum_key == forum_key)\
+            .order(-cls.creation_time, cls.status, cls.key)
 
         if cursor:
             cursor_obj = Cursor.from_websafe_string(cursor)
@@ -314,3 +316,18 @@ class AboutPage(ndb.Model):
     @classmethod
     def get(cls, _id):
         return cls.get_by_id(_id)
+
+
+class ChangePasswordRequest(ndb.Model):
+    user_key = ndb.KeyProperty(kind=User)
+    token = ndb.StringProperty()
+    creation_time = ndb.DateTimeProperty(auto_now_add=True)
+    last_update_time = ndb.DateTimeProperty(auto_now=True)
+
+    @classmethod
+    def by_token(cls, token):
+        ls = cls.query(cls.token == token).fetch()
+        if len(ls) > 0:
+            return ls[0]
+        else:
+            return None

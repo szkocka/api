@@ -28,6 +28,8 @@ indexes:
   properties:
   - name: research_key
   - name: status
+  - name: creation_time
+    direction: desc
 
 - kind: Research
   properties:

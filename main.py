@@ -2,18 +2,19 @@
 from apis.auth import AuthLocalLogin
 from apis.messages import AddMessage, ListMessages, UpdateMessage, DeleteMessage
 from apis.pages import UpdateAboutPage, GetAboutPage
+from apis.password import ResetPassword, NewPassword, UpdatePassword
 from apis.queries import FindResearches
 from apis.req_to_join import ReqToJoinResearch, ApproveResearcher, RejectResearcher, ListReqToJoinResearch
 from apis.forums import GetForum, ListForums, AddForum, UpdateForum, DeleteForum
 from apis.me import Me, MyInvites, AcceptInvite, RejectInvite
 from apis.news import AddNews, ListNews
-from apis.researchers import InviteResearcher, RemoveResearcher
+from apis.researchers import InviteResearcher, RemoveResearcher, UpdateSupervisor
 from apis.researches import AddResearch, UpdateResearch, GetResearch, ListTags, DeleteResearch
 from apis.researches import ListResearches
 from apis.tasks.tasks import IndexResearch, NotifyAboutNewMessage
 from apis.upload import UploadImage
 from apis.users import CreateUser, UserDetails, UpdateUser, ListAllUsers, ListUserResearches, ListUserForums, \
-    ListUserMessages, BanUsers, DeleteUsers, UpdatePassword, UnBanUsers, UpdateUserByAdmin
+    ListUserMessages, BanUsers, DeleteUsers, UnBanUsers, UpdateUserByAdmin
 from flask import Flask
 from flask.ext.cors import CORS
 from flask.ext.restful import Api
@@ -48,6 +49,7 @@ api.add_resource(ListMessages, '/forums/<forum_id>/messages')
 api.add_resource(UpdateMessage, '/forums/messages/<message_id>')
 api.add_resource(DeleteMessage, '/forums/messages/<message_id>')
 
+api.add_resource(UpdateSupervisor, '/researches/<research_id>/supervisor')
 api.add_resource(InviteResearcher, '/researches/<research_id>/invites')
 api.add_resource(RemoveResearcher, '/researches/<research_id>/researchers/<user_id>')
 api.add_resource(ApproveResearcher, '/researches/<research_id>/researchers/<user_id>/approved')
@@ -68,6 +70,8 @@ api.add_resource(ListUserForums, '/users/<user_id>/forums')
 api.add_resource(ListUserMessages, '/users/<user_id>/messages')
 api.add_resource(Me, '/users/me')
 api.add_resource(UpdatePassword, '/users/me/password')
+api.add_resource(ResetPassword, '/users/reset-passwords')
+api.add_resource(NewPassword, '/users/new-password')
 api.add_resource(MyInvites, '/users/me/invites/researches')
 api.add_resource(AcceptInvite, '/users/me/invites/researches/<research_id>/accepted')
 api.add_resource(RejectInvite, '/users/me/invites/researches/<research_id>/declined')
