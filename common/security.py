@@ -127,6 +127,26 @@ def is_supervisor_or_admin(func):
     return wrapper
 
 
+def is_message_owner_or_admin(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        message = kwargs['message']
+        current_user = kwargs['current_user']
+
+        research = message\
+            .forum_key.get()\
+            .research_key.get()
+
+        if current_user.is_supervisor_of(research)\
+                or message.creator_key == current_user.key\
+                or current_user.is_admin:
+            return func(*args, **kwargs)
+        else:
+            return forbidden('You must be owner to call this API.')
+
+    return wrapper
+
+
 def is_admin(func):
     @wraps(func)
     def wrapper(*args, **kwargs):

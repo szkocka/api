@@ -8,7 +8,7 @@ from apis.forums import GetForum, ListForums, AddForum, UpdateForum, DeleteForum
 from apis.me import Me, MyInvites, AcceptInvite, RejectInvite
 from apis.news import AddNews, ListNews
 from apis.researchers import InviteResearcher, RemoveResearcher
-from apis.researches import AddResearch, UpdateResearch, GetResearch, ListTags
+from apis.researches import AddResearch, UpdateResearch, GetResearch, ListTags, DeleteResearch
 from apis.researches import ListResearches
 from apis.tasks.tasks import IndexResearch, NotifyAboutNewMessage
 from apis.upload import UploadImage
@@ -34,6 +34,7 @@ api.add_resource(AddResearch, '/researches')
 api.add_resource(ListResearches, '/researches')
 api.add_resource(GetResearch, '/researches/<research_id>')
 api.add_resource(UpdateResearch, '/researches/<research_id>')
+api.add_resource(DeleteResearch, '/researches/<research_id>')
 api.add_resource(ListTags, '/researches/tags')
 
 api.add_resource(ListForums, '/researches/<research_id>/forums')

@@ -128,11 +128,17 @@ class Research(ndb.Model):
 
     @classmethod
     def by_supervisor(cls, user_key):
-        return cls.query(cls.supervisor_key == user_key).fetch()
+        return cls.query(
+                cls.supervisor_key == user_key,
+                cls.status.IN([StatusType.ACTIVE, StatusType.BANNED]))\
+            .fetch()
 
     @classmethod
     def by_researcher(cls, user_key):
-        return cls.query(cls.researchers_keys == user_key).fetch()
+        return cls.query(
+                cls.researchers_keys == user_key,
+                cls.status.IN([StatusType.ACTIVE, StatusType.BANNED]))\
+            .fetch()
 
 
 class RelationshipType:
@@ -201,6 +207,13 @@ class Forum(ndb.Model):
         return query.fetch_page(page_size)
 
     @classmethod
+    def by_research2(cls, research_key):
+        return cls.query(
+                cls.status == StatusType.ACTIVE,
+                cls.research_key == research_key)\
+            .fetch()
+
+    @classmethod
     def by_creator(cls, user_key, cursor):
         page_size = int(os.environ['PAGE_SIZE'])
         query = cls.query(
@@ -244,6 +257,13 @@ class Message(ndb.Model):
             cursor_obj = Cursor.from_websafe_string(cursor)
             return query.fetch_page(page_size, start_cursor=cursor_obj)
         return query.fetch_page(page_size)
+
+    @classmethod
+    def by_forum2(cls, forum_key):
+        return cls.query(
+                cls.status == StatusType.ACTIVE,
+                cls.forum_key == forum_key)\
+            .fetch()
 
     @classmethod
     def by_creator(cls, user_key, cursor):

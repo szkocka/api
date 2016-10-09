@@ -6,7 +6,7 @@ from google.appengine.api.taskqueue import taskqueue
 
 from common.http_responses import ok, created, ok_msg
 from common.insert_wraps import insert_forum, insert_message
-from common.security import is_researcher, authenticate, is_admin
+from common.security import is_researcher, authenticate, is_admin, is_message_owner_or_admin
 from common.validation import validate_request
 from model.db import Message, StatusType
 from model.resp import ListMessagesJson, MessageIdJson
@@ -42,7 +42,7 @@ class AddMessage(Resource):
 
 
 class UpdateMessage(Resource):
-    method_decorators = [is_admin, insert_message, validate_request, authenticate]
+    method_decorators = [is_message_owner_or_admin, insert_message, validate_request, authenticate]
     required_fields = ['message']  # used by validate_request
 
     def put(self, current_user, message):
@@ -52,7 +52,7 @@ class UpdateMessage(Resource):
 
 
 class DeleteMessage(Resource):
-    method_decorators = [is_admin, insert_message, authenticate]
+    method_decorators = [is_message_owner_or_admin, insert_message, authenticate]
 
     def delete(self, current_user, message):
         message.status = StatusType.DELETED
