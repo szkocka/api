@@ -64,11 +64,11 @@ class UpdateSupervisor(Resource):
     required_fields = ['new_supervisor']
 
     def put(self, current_user, research):
-        new_supervisor = request.json['new_supervisor']
-        supervisor = User.get(int(new_supervisor))
+        new_supervisor_email = request.json['new_supervisor']
+        supervisor = User.by_email(new_supervisor_email)
 
         if not supervisor:
-            return not_found('User with id not found.')
+            return not_found('User with email not found.')
 
         self.__delete_relationship(research, research.supervisor_key.get())
         research.supervisor_key = supervisor.key

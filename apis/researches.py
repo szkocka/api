@@ -10,6 +10,7 @@ from common.util import get_relationship_types
 from common.validation import validate_request
 from common.security import authenticate, is_supervisor, optional_authenticate
 from model.db import Research, ResearchRelationship, RelationshipType, StatusType, Forum, Message
+from model.docs import ResearchIndex
 from model.resp import TagsJson, ResearchIdJson, ListResearchesJson, ResearchDetailsJson
 
 
@@ -125,6 +126,8 @@ class DeleteResearch(Resource):
             for message in messages:
                 message.status = StatusType.DELETED
                 message.put()
+
+        ResearchIndex(research).delete()
 
         return ok_msg('Research is deleted.')
 

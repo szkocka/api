@@ -2,7 +2,7 @@ import logging
 import os
 
 from google.appengine.api import search
-from model.db import Research
+from model.db import Research, StatusType
 
 RESEARCH_INDEX = search.Index(name='research')
 
@@ -51,4 +51,7 @@ class ResearchIndex:
 
         logging.info(query)
         results = RESEARCH_INDEX.search(search_query).results
-        return map(lambda r: Research.get(int(r.doc_id)), results)
+
+        found_researches = map(lambda r: Research.get(int(r.doc_id)), results)
+
+        return filter(lambda r: r.status != StatusType.DELETED, found_researches)

@@ -253,7 +253,7 @@ class Message(ndb.Model):
         query = cls.query(
                 cls.status == StatusType.ACTIVE,
                 cls.forum_key == forum_key)\
-            .order(-cls.creation_time, cls.status, cls.key)
+            .order(cls.creation_time, cls.status, cls.key)
 
         if cursor:
             cursor_obj = Cursor.from_websafe_string(cursor)
@@ -272,7 +272,8 @@ class Message(ndb.Model):
         page_size = int(os.environ['PAGE_SIZE'])
         query = cls.query(
                 cls.status == StatusType.ACTIVE,
-                cls.creator_key == user_key).order(cls.status, -cls.creation_time, cls.key)
+                cls.creator_key == user_key)\
+            .order(cls.creation_time, cls.status, cls.key)
 
         if cursor:
             cursor_obj = Cursor.from_websafe_string(cursor)
@@ -283,8 +284,7 @@ class Message(ndb.Model):
     def by_creator2(cls, user_key):
         query = cls.query(
                 cls.status.IN([StatusType.ACTIVE, StatusType.BANNED]),
-                cls.creator_key == user_key)\
-            .order(-cls.creation_time, cls.key)
+                cls.creator_key == user_key)
 
         return query.fetch()
 

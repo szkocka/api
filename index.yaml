@@ -1,23 +1,15 @@
 indexes:
 - kind: Message
   properties:
-  - name: forum_key
-  - name: creation_time
-    direction: desc
-
-- kind: Message
-  properties:
   - name: creator_key
   - name: status
   - name: creation_time
-    direction: desc
 
 - kind: Message
   properties:
   - name: forum_key
   - name: status
   - name: creation_time
-    direction: desc
 
 - kind: Forum
   properties:

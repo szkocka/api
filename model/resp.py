@@ -78,8 +78,8 @@ class NewsJson(BaseJsonResponce):
 class MessageJson(BaseJsonResponce):
     def __init__(self, message):
         self.id = message.key.id(),
-        self.createdBy = UserJson(message.creator_key.get()).js(),
-        self.created = message.creation_time.strftime('%Y-%m-%d %H:%M:%S'),
+        self.createdBy = UserJson(message.creator_key.get()).js()
+        self.created = message.creation_time.strftime('%Y-%m-%d %H:%M:%S')
         self.message = message.text
 
 
