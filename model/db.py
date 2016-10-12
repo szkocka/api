@@ -104,6 +104,10 @@ class Research(ndb.Model):
         return q.fetch_page(page_size)
 
     @classmethod
+    def all2(cls):
+        return cls.query().fetch()
+
+    @classmethod
     def all_tags(cls):
         researches = cls.query().fetch(projection=['tags'])
         tags = set({})
@@ -150,6 +154,7 @@ class RelationshipType:
     APPROVED = 'APPROVED'
     REJECTED = 'REJECTED'
     SUPERVISOR = 'SUPERVISOR'
+    ADDED_BY_ADMIN = 'ADDED_BY_ADMIN'
 
 
 class ResearchRelationship(ndb.Model):

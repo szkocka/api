@@ -28,6 +28,15 @@ class ResearchIndex:
         RESEARCH_INDEX.delete(self.doc_id)
 
     @classmethod
+    def reindex_all(cls):
+        for r in Research.all2():
+            r_index = ResearchIndex(r)
+            r_index.delete()
+
+            if r.status == StatusType.ACTIVE:
+                r_index.put()
+
+    @classmethod
     def find(cls, keyword, status, tag, page):
         page_size = int(os.environ['PAGE_SIZE'])
         offset = page_size * int(page)

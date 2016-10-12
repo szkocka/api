@@ -47,7 +47,7 @@ class ResetPassword(Resource):
         if user:
             token = str(uuid.uuid4())
             base_url = os.environ['BASE_UI_URL']
-            url = base_url + '/forgot-password?token=' + token
+            url = base_url + '/forgot-password/' + token
             user_name = user.name
 
             ChangePasswordRequest(user_key=user.key, token=token).put()

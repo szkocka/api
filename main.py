@@ -8,7 +8,7 @@ from apis.req_to_join import ReqToJoinResearch, ApproveResearcher, RejectResearc
 from apis.forums import GetForum, ListForums, AddForum, UpdateForum, DeleteForum
 from apis.me import Me, MyInvites, AcceptInvite, RejectInvite
 from apis.news import AddNews, ListNews
-from apis.researchers import InviteResearcher, RemoveResearcher, UpdateSupervisor
+from apis.researchers import InviteResearcher, RemoveResearcher, UpdateSupervisor, AddResearcher
 from apis.researches import AddResearch, UpdateResearch, GetResearch, ListTags, DeleteResearch
 from apis.researches import ListResearches
 from apis.tasks.tasks import IndexResearch, NotifyAboutNewMessage
@@ -51,6 +51,7 @@ api.add_resource(DeleteMessage, '/forums/messages/<message_id>')
 
 api.add_resource(UpdateSupervisor, '/researches/<research_id>/supervisor')
 api.add_resource(InviteResearcher, '/researches/<research_id>/invites')
+api.add_resource(AddResearcher, '/researches/<research_id>/researchers')
 api.add_resource(RemoveResearcher, '/researches/<research_id>/researchers/<user_id>')
 api.add_resource(ApproveResearcher, '/researches/<research_id>/researchers/<user_id>/approved')
 api.add_resource(RejectResearcher, '/researches/<research_id>/researchers/<user_id>/rejected')

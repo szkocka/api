@@ -85,3 +85,31 @@ class UpdateSupervisor(Resource):
         ResearchRelationship(research_key=research_key,
                          user_email=user.email,
                          type=RelationshipType.SUPERVISOR).put()
+
+
+class AddResearcher(Resource):
+    method_decorators = [is_admin, insert_research, validate_request, authenticate]
+    required_fields = ['new_researcher']
+
+    def post(self, current_user, research):
+        researcher_email = request.json['new_researcher']
+        researcher = User.by_email(researcher_email)
+
+        if not researcher:
+            return not_found('User with email not found.')
+
+        if researcher.key in research.researchers_keys \
+                or research.supervisor_key == researcher.key:
+            return bad_request('User already is researcher.')
+
+        research.researchers_keys.append(researcher.key)
+        research.put()
+
+        self.__add_relationship(research.key, researcher_email)
+
+        return ok_msg('Researcher is added.')
+
+    def __add_relationship(self, research_key, email):
+        ResearchRelationship(research_key=research_key,
+                             user_email=email,
+                             type=RelationshipType.ADDED_BY_ADMIN).put()
